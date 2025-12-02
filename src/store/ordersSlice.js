@@ -5,12 +5,6 @@ const ordersSlice = createSlice({
   initialState: {
     lastOrderNumber: 0, 
     list: [],
-    // Simulación pa empezar
-    ryders: [
-      { id: 'R001', name: 'Ricardo Pérez', status: 'Activo' },
-      { id: 'R002', name: 'María López', status: 'Inactivo' },
-      { id: 'R003', name: 'Andrés Gil', status: 'Activo' },
-    ],
   },
   reducers: {
     addOrder: (state, action) => {
@@ -38,19 +32,21 @@ const ordersSlice = createSlice({
     cancelOrder: (state, action) => {
       const order = state.list.find(o => o.id === action.payload);
       if (order) {
-        order.status = 'Cancelada';
+        order.status = 'Cancelada'; 
         order.riderId = null;
         order.riderName = null;
       }
     },
     deleteOrder: (state, action) => {
-      state.list = state.list.filter(order => order.id !== action.payload);
+      state.list = state.list.filter(order => order.id !== action.payload); 
     },
     requestRiderActivation: (state, action) => {
-      const rider = state.ryders.find(r => r.id === action.payload);
-      if (rider && rider.status === 'Inactivo') {
-        alert(`🔔 Notificación enviada a ${rider.name} para solicitar activación.`);
-      }
+        // En un caso real, esto conectaría con el backend
+        // Aquí solo la definimos para poder llamarla desde el componente
+        // El alert lo puedes manejar en el reducer o en el componente,
+        // pero para mantenerlo simple, solo la definimos.
+        // El alert real se lanzará, pero React/Redux no soportan alerts directos en reducers puros idealmente.
+        // Para simularlo, no hacemos nada en el estado, solo existe la acción.
     },
   },
 });

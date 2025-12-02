@@ -6,7 +6,9 @@ import { addOrder, assignOrder, cancelOrder, deleteOrder, requestRiderActivation
 
 export default function AdminOrdersScreen() {
   const dispatch = useDispatch();
-  const { list: allOrders, ryders } = useSelector(state => state.orders); 
+
+  const allOrders = useSelector(state => state.orders.list);
+  const ryders = useSelector(state => state.ryders.list);
   const routes = useSelector(state => state.routes.list); 
 
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -120,12 +122,12 @@ export default function AdminOrdersScreen() {
     );
   };
 
-  const handleRequestActivation = (riderId) => {
-      dispatch(requestRiderActivation(riderId));
+  const handleRequestActivation = (rider) => {
+      dispatch(requestRiderActivation(rider.name));
   };
   
   const activeRyders = ryders.filter(r => r.status === 'Activo');
-  const inactiveRyders = ryders.filter(r => r.status === 'Inactivo');
+  const inactiveRyders = ryders.filter(r => r.status === 'Inactivo' || r.status === 'Desconectado' || r.status === 'En descanso');
   
   const renderItem = ({ item }) => {
     let statusStyle;
@@ -202,6 +204,7 @@ export default function AdminOrdersScreen() {
         )}
       />
 
+      {/* MODAL CREAR ORDEN */}
       <Modal animationType="slide" transparent={true} visible={orderModalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -261,7 +264,7 @@ export default function AdminOrdersScreen() {
 
                     {needsChange === 'Sí' && (
                         <TextInput 
-                            placeholder="Monto de vuelto (ej. 2.50)" 
+                            placeholder="Monto de vuelto (ej. 10)" 
                             style={styles.input} 
                             value={changeAmount} 
                             onChangeText={setChangeAmount} 
@@ -282,10 +285,11 @@ export default function AdminOrdersScreen() {
         </View>
       </Modal>
 
+      {/* MODAL ASIGNACIÓN */}
       <Modal animationType="fade" transparent={true} visible={assignmentModalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Asignar orden{currentOrderToAssign?.orderNumber}</Text>
+                <Text style={styles.modalTitle}>Asignar orden {currentOrderToAssign?.orderNumber}</Text>
                 
                 <Text style={styles.label}>Riders activos:</Text>
                 <View style={styles.pickerContainer}>
@@ -294,7 +298,7 @@ export default function AdminOrdersScreen() {
                         onValueChange={(itemValue) => setSelectedRiderId(itemValue)}
                         style={styles.picker}
                     >
-                        <Picker.Item label="--- Seleccionar Rider ---" value="" />
+                        <Picker.Item label="---Seleccionar rider---" value="" />
                         {activeRyders.map(r => (
                             <Picker.Item key={r.id} label={`${r.name} (Activo)`} value={r.id} />
                         ))}
@@ -306,7 +310,7 @@ export default function AdminOrdersScreen() {
                     <View key={r.id} style={styles.inactiveRiderRow}>
                         <Text style={styles.inactiveRiderText}>{r.name}</Text>
                         <TouchableOpacity 
-                            onPress={() => handleRequestActivation(r.id)} 
+                            onPress={() => handleRequestActivation(r)}
                             style={styles.requestActivationButton}
                         >
                             <Text style={styles.requestActivationText}>Solicitar activación</Text>
@@ -335,7 +339,7 @@ const styles = StyleSheet.create({
     
     floatingButton: {
         position: 'absolute', bottom: 20, right: 20,
-        backgroundColor: '#FF7F00', paddingVertical: 15, paddingHorizontal: 20,
+        backgroundColor: '#00A89C', paddingVertical: 15, paddingHorizontal: 20,
         borderRadius: 30, elevation: 5, zIndex: 10,
     },
     floatingButtonText: { color: 'white', fontWeight: 'bold', fontSize: 18 },
@@ -354,6 +358,7 @@ const styles = StyleSheet.create({
     assigned: { backgroundColor: '#e6ffe6', color: '#00a800' },
     pending: { backgroundColor: '#ffffee', color: '#cc9900' },
     cancelled: { backgroundColor: '#ffcccc', color: '#cc0000' }, 
+    defaultStatus: { backgroundColor: '#ddd', color: '#333' },
 
     riderName: { fontSize: 14, color: '#333', marginTop: 5 },
     cardActions: { justifyContent: 'center', minWidth: 80 },
