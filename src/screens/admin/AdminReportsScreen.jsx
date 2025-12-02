@@ -1,15 +1,273 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { useSelector } from 'react-redux';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import moment from 'moment';
 
-export default function AdminReportScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Aquí se podrán descargar reportes y ver el historial de órdenes</Text>
-    </View>
-  );
+const getWeeklyReport = (orders, startDate, endDate) => {
+    const weeklyData = {};
+    const start = moment(startDate).startOf('day');
+    const end = moment(endDate).endOf('day');
+
+    let currentWeekStart = moment(start).startOf('isoWeek');
+    while (currentWeekStart.isSameOrBefore(end)) {
+        const weekKey = currentWeekStart.format('YYYY-MM-DD');
+        weeklyData[weekKey] = {
+            totalOrders: 0,
+            completedOrders: 0,
+            cancelledOrders: 0,
+            pendingOrders: 0,
+            totalRevenue: 0,
+            weekLabel: `Semana ${currentWeekStart.format('DD/MM')} - ${moment(currentWeekStart).endOf('isoWeek').format('DD/MM')}`
+        };
+        currentWeekStart.add(1, 'week');
+    }
+
+    orders.forEach(order => {
+        const orderDate = moment(order.createdAt);
+
+        if (orderDate.isBetween(start, end, null, '[]')) { 
+            const weekKey = orderDate.startOf('isoWeek').format('YYYY-MM-DD');
+            
+            if (weeklyData[weekKey]) {
+                weeklyData[weekKey].totalOrders += 1;
+                weeklyData[weekKey].totalRevenue += parseFloat(order.deliveryCost || 0);
+
+                switch (order.status) {
+                    case 'Completada':
+                        weeklyData[weekKey].completedOrders += 1;
+                        break;
+                    case 'Cancelada':
+                        weeklyData[weekKey].cancelledOrders += 1;
+                        break;
+                    case 'Pendiente':
+                    case 'Asignada':
+                        weeklyData[weekKey].pendingOrders += 1;
+                        break;
+                }
+            }
+        }
+    });
+
+    return Object.values(weeklyData).sort((a, b) => moment(a.weekLabel.split(' ')[1], 'DD/MM').valueOf() - moment(b.weekLabel.split(' ')[1], 'DD/MM').valueOf());
+};
+
+export default function AdminReportsScreen() {
+    const allOrders = useSelector(state => state.orders.list);
+
+    const defaultEndDate = moment().toDate();
+    const defaultStartDate = moment().subtract(4, 'weeks').startOf('isoWeek').toDate(); 
+
+    const [startDate, setStartDate] = useState(defaultStartDate);
+    const [endDate, setEndDate] = useState(defaultEndDate);
+
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+    const weeklyReport = useMemo(() => {
+        return getWeeklyReport(allOrders, startDate, endDate);
+    }, [allOrders, startDate, endDate]);
+
+
+    const handleDateChange = (event, selectedDate, type) => {
+        if (Platform.OS === 'android') {
+            type === 'start' ? setShowStartDatePicker(false) : setShowEndDatePicker(false);
+        }
+
+        if (selectedDate) {
+            if (type === 'start') {
+                if (moment(selectedDate).isAfter(endDate)) {
+                    Alert.alert('Error', 'La fecha de inicio no puede ser posterior a la fecha final.');
+                } else {
+                    setStartDate(selectedDate);
+                }
+            } else {
+                if (moment(selectedDate).isBefore(startDate)) {
+                    Alert.alert('Error', 'La fecha final no puede ser anterior a la fecha de inicio.');
+                } else {
+                    setEndDate(selectedDate);
+                }
+            }
+        }
+    };
+    
+    const totalOrders = weeklyReport.reduce((sum, w) => sum + w.totalOrders, 0);
+    const totalCompleted = weeklyReport.reduce((sum, w) => sum + w.completedOrders, 0);
+    const totalRevenue = weeklyReport.reduce((sum, w) => sum + w.totalRevenue, 0);
+
+    return (
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                
+                <Text style={styles.header}>📊 Resumen de Reportes</Text>
+                
+                {/* SECCIÓN DE FILTROS */}
+                <View style={styles.filterSection}>
+                    <Text style={styles.sectionTitle}>Filtro de Rango de Fechas</Text>
+                    
+                    <View style={styles.datePickerRow}>
+                        
+                        <View style={styles.dateInputContainer}>
+                            <Text style={styles.label}>Inicio:</Text>
+                            <TouchableOpacity onPress={() => setShowStartDatePicker(true)} style={styles.dateInput}>
+                                <Text>{moment(startDate).format('DD/MM/YYYY')}</Text>
+                            </TouchableOpacity>
+                            {showStartDatePicker && (
+                                <DateTimePicker
+                                    value={startDate}
+                                    mode="date"
+                                    display="default"
+                                    maximumDate={new Date()}
+                                    onChange={(e, d) => handleDateChange(e, d, 'start')}
+                                />
+                            )}
+                        </View>
+
+                        <View style={styles.dateInputContainer}>
+                            <Text style={styles.label}>Final:</Text>
+                            <TouchableOpacity onPress={() => setShowEndDatePicker(true)} style={styles.dateInput}>
+                                <Text>{moment(endDate).format('DD/MM/YYYY')}</Text>
+                            </TouchableOpacity>
+                            {showEndDatePicker && (
+                                <DateTimePicker
+                                    value={endDate}
+                                    mode="date"
+                                    display="default"
+                                    maximumDate={new Date()}
+                                    onChange={(e, d) => handleDateChange(e, d, 'end')}
+                                />
+                            )}
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.separator} />
+                
+                {/* KPIs GLOBALES */}
+                <Text style={styles.sectionTitle}>Indicadores Clave del Período</Text>
+                <View style={styles.kpiContainer}>
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiValue}>{totalOrders}</Text>
+                        <Text style={styles.kpiLabel}>Órdenes Totales</Text>
+                    </View>
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiValue}>{totalCompleted}</Text>
+                        <Text style={styles.kpiLabel}>Órdenes Completadas</Text>
+                    </View>
+                </View>
+                <View style={styles.kpiContainer}>
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiValueRevenue}>${totalRevenue.toFixed(2)}</Text>
+                        <Text style={styles.kpiLabel}>Ingreso Delivery (Est.)</Text>
+                    </View>
+                    <View style={styles.kpiCardPlaceholder}>
+                        <Text style={styles.kpiPlaceholderText}>Promedio de Tiempo de Entrega</Text>
+                        <Text style={styles.kpiPlaceholderValue}>--:--</Text>
+                        <Text style={styles.kpiPlaceholderSubtext}>(Pendiente por implementar)</Text>
+                    </View>
+                </View>
+
+                <View style={styles.separator} />
+                
+                {/* REPORTE SEMANAL */}
+                <Text style={styles.sectionTitle}>Resumen de órdenes semanal</Text>
+                
+                {weeklyReport.length === 0 ? (
+                    <Text style={styles.emptyText}>No hay datos en el rango seleccionado.</Text>
+                ) : (
+                    weeklyReport.map((week, index) => (
+                        <View key={index} style={styles.weekCard}>
+                            <Text style={styles.weekTitle}>{week.weekLabel}</Text>
+                            <View style={styles.weekDetailRow}>
+                                <Text style={styles.weekDetailLabel}>Total de Órdenes:</Text>
+                                <Text style={styles.weekDetailValueTotal}>{week.totalOrders}</Text>
+                            </View>
+                            <View style={styles.weekDetailRow}>
+                                <Text style={styles.weekDetailLabel}>Completadas:</Text>
+                                <Text style={styles.weekDetailValueCompleted}>{week.completedOrders}</Text>
+                            </View>
+                            <View style={styles.weekDetailRow}>
+                                <Text style={styles.weekDetailLabel}>Canceladas:</Text>
+                                <Text style={styles.weekDetailValueCancelled}>{week.cancelledOrders}</Text>
+                            </View>
+                            <View style={styles.weekDetailRow}>
+                                <Text style={styles.weekDetailLabel}>Pendientes/Asignadas:</Text>
+                                <Text style={styles.weekDetailValuePending}>{week.pendingOrders}</Text>
+                            </View>
+                            <View style={styles.weekDetailRow}>
+                                <Text style={styles.weekDetailLabel}>Ingreso Estimado:</Text>
+                                <Text style={styles.weekDetailValueRevenue}>${week.totalRevenue.toFixed(2)}</Text>
+                            </View>
+                        </View>
+                    ))
+                )}
+                
+            </ScrollView>
+
+            {/* BOTÓN DE DESCARGA (FUTURO) */}
+            <TouchableOpacity style={styles.downloadButton} disabled={true}>
+                <Text style={styles.downloadButtonText}>Descargar Reporte (Futuro)</Text>
+            </TouchableOpacity>
+
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold' }
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    scrollContent: { padding: 15, paddingBottom: 100 },
+    header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 15, textAlign: 'center' },
+    separator: { height: 1, backgroundColor: '#ddd', marginVertical: 20 },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#00A89C', marginBottom: 10 },
+    emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
+
+    // Filtros
+    filterSection: { padding: 10, backgroundColor: 'white', borderRadius: 10, elevation: 1 },
+    datePickerRow: { flexDirection: 'row', justifyContent: 'space-between' },
+    dateInputContainer: { flex: 1, marginHorizontal: 5 },
+    label: { fontSize: 14, color: '#555', marginBottom: 5, fontWeight: 'bold' },
+    dateInput: {
+        borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10,
+        backgroundColor: '#fff', alignItems: 'center',
+    },
+
+    // KPIs
+    kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+    kpiCard: {
+        flex: 1, backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 5,
+        alignItems: 'center', elevation: 2,
+    },
+    kpiValue: { fontSize: 32, fontWeight: 'bold', color: '#FF7F00' },
+    kpiValueRevenue: { fontSize: 32, fontWeight: 'bold', color: '#00A89C' },
+    kpiLabel: { fontSize: 14, color: '#555', marginTop: 5, textAlign: 'center' },
+    
+    kpiCardPlaceholder: { // Estilo para el área de tiempo de entrega (pendiente)
+        flex: 1, backgroundColor: '#eee', padding: 15, borderRadius: 10, marginHorizontal: 5,
+        alignItems: 'center', justifyContent: 'center', elevation: 2,
+    },
+    kpiPlaceholderText: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 5 },
+    kpiPlaceholderValue: { fontSize: 28, fontWeight: 'bold', color: '#888' },
+    kpiPlaceholderSubtext: { fontSize: 12, color: '#888', marginTop: 3 },
+
+    // --- Reporte Semanal ---
+    weekCard: {
+        backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10,
+        elevation: 1,
+    },
+    weekTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 },
+    weekDetailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
+    weekDetailLabel: { fontSize: 14, color: '#555' },
+    weekDetailValueTotal: { fontSize: 14, fontWeight: 'bold', color: '#333' },
+    weekDetailValueCompleted: { fontSize: 14, fontWeight: 'bold', color: '#00A89C' },
+    weekDetailValueCancelled: { fontSize: 14, fontWeight: 'bold', color: '#d9534f' },
+    weekDetailValuePending: { fontSize: 14, fontWeight: 'bold', color: '#FF7F00' },
+    weekDetailValueRevenue: { fontSize: 14, fontWeight: 'bold', color: '#00A89C' },
+
+    // --- Botón de Descarga ---
+    downloadButton: {
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        backgroundColor: '#ccc', // Desactivado por ahora
+        paddingVertical: 15, alignItems: 'center',
+    },
+    downloadButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
 });
