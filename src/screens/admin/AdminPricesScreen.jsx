@@ -17,7 +17,7 @@ export default function AdminPricesScreen() {
 
   const handleSave = () => {
     if (!name || !zones || !price) {
-      Alert.alert('Error', 'Completa todos los campos');
+      Alert.alert('Epa', 'Completa todos los campos');
       return;
     }
 
@@ -39,7 +39,7 @@ export default function AdminPricesScreen() {
 
   const handleDelete = (id) => {
     Alert.alert(
-      "Eliminar Ruta",
+      "Eliminar ruta",
       "¿Estás seguro?",
       [
         { text: "Cancelar", style: "cancel" },
@@ -92,7 +92,6 @@ export default function AdminPricesScreen() {
         <Text style={styles.mapSubtext}>(Integración de Google Maps aquí)</Text>
       </View>
 
-      {/* 2. SECCIÓN DE GESTIÓN */}
       <View style={styles.listContainer}>
         <View style={styles.listHeader}>
             <Text style={styles.headerTitle}>Rutas Activas</Text>
@@ -109,11 +108,10 @@ export default function AdminPricesScreen() {
         />
       </View>
 
-      {/* 3. MODAL (Formulario para Crear/Editar) */}
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>{isEditing ? 'Editar Ruta' : 'Crear Nueva Ruta'}</Text>
+                <Text style={styles.modalTitle}>{isEditing ? 'Editar ruta' : 'Crear nueva ruta'}</Text>
                 
                 <TextInput 
                     placeholder="Nombre (ej. Zona del Este)" 
