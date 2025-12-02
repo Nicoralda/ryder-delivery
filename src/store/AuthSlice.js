@@ -18,7 +18,6 @@ const authSlice = createSlice({
                 role: action.payload.role,
             };
         },
-        // Para cerrar sesión
         logout: (state) => {
             state.isAuthenticated = false;
             state.userRole = null;

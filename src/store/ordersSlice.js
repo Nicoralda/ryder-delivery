@@ -1,46 +1,55 @@
 import { createSlice } from '@reduxjs/toolkit';
 import moment from 'moment';
 
-const createOrder = (id, status, daysAgo, cost, riderId = null, riderName = null) => ({
-    id: `ORD${id}`,
-    orderNumber: String(id).padStart(4, '0'),
-    customerName: `Cliente ${id}`,
-    phone: '555-1234',
-    location: 'Ubicación de prueba',
-    zoneName: 'Zona A',
-    deliveryCost: cost,
-    paymentMethod: 'Divisa Efectivo',
-    needsChange: 'No',
-    changeAmount: null,
-    status: status,
-    createdAt: moment().subtract(daysAgo, 'days').toISOString(), 
-    riderId: riderId, 
-    riderName: riderName,
-});
+// Para simular tiempos en los datos de prueba
+const createOrder = (id, status, daysAgo, cost, riderId, durationInMinutes = 0) => {
+    const createdAt = moment().subtract(daysAgo, 'days');
+    
+// Simulación de tiempos
+    let pickupTime = null;
+    let deliveredTime = null;
+
+    if (status === 'Completada' || status === 'En camino') {
+        pickupTime = moment(createdAt).add(30, 'minutes').toISOString();
+    }
+    if (status === 'Completada') {
+        deliveredTime = moment(pickupTime).add(durationInMinutes, 'minutes').toISOString();
+    }
+
+    return {
+        id: `ORD${id}`,
+        orderNumber: String(id).padStart(4, '0'),
+        customerName: `Cliente ${id}`,
+        phone: '555-00' + id,
+        location: `Calle Principal ${id}, Edificio ${id}`,
+        zoneName: 'Zona A',
+        deliveryCost: cost,
+        paymentMethod: 'Divisa Efectivo',
+        needsChange: 'No',
+        changeAmount: null,
+        status: status,
+        createdAt: createdAt.toISOString(),
+        riderId: riderId,
+        riderName: 'Rider Test',
+        pickupTime: pickupTime,
+        deliveredTime: deliveredTime, 
+    };
+};
 
 const initialState = {
     lastOrderNumber: 20, 
     list: [
-        //datos iniciales para los reportes de 4 semanas
+    // Semana actual
+    // Orden completada (tardó 45 min)
+        createOrder(20, 'Completada', 0, '3.50', 'R001', 45), 
+    // Orden completada (tardó 30 min)
+        createOrder(19, 'Completada', 1, '3.50', 'R001', 30),
+    // Orden asignada (aún no iniciada por el rider)
+        createOrder(18, 'Asignada', 0, '2.00', 'R001', 0),
         
-        createOrder(20, 'Completada', 1, '3.50', 'R001', 'Ricardo Pérez'),
-        createOrder(19, 'Completada', 2, '3.50', 'R001', 'Ricardo Pérez'),
-        createOrder(18, 'Pendiente', 2, '2.00', null, null),
-        
-        createOrder(17, 'Completada', 8, '5.00', 'R002', 'María López'),
-        createOrder(16, 'Completada', 9, '2.50', 'R002', 'María López'),
-        createOrder(15, 'Cancelada', 10, '3.00', null, null),
-        createOrder(14, 'Asignada', 11, '4.00', 'R001', 'Ricardo Pérez'),
-
-        createOrder(13, 'Completada', 15, '3.50', 'R001', 'Ricardo Pérez'),
-        createOrder(12, 'Completada', 16, '5.00', 'R002', 'María López'),
-        createOrder(11, 'Completada', 17, '2.00', 'R002', 'María López'),
-        createOrder(10, 'Cancelada', 18, '2.50', null, null),
-
-        createOrder(9, 'Completada', 22, '3.50', 'R001', 'Ricardo Pérez'),
-        createOrder(8, 'Completada', 23, '4.00', 'R002', 'María López'),
-        createOrder(7, 'Completada', 24, '3.00', 'R001', 'Ricardo Pérez'),
-        createOrder(6, 'Cancelada', 25, '3.50', null, null),
+    // Semanas anteriores
+        createOrder(17, 'Completada', 8, '5.00', 'R001', 60),
+        createOrder(16, 'Completada', 9, '2.50', 'R002', 25),
     ],
 };
 
@@ -57,11 +66,11 @@ const ordersSlice = createSlice({
                 status: 'Pendiente', 
                 createdAt: new Date().toISOString(), 
                 riderId: null,
-                riderName: null,
+                pickupTime: null,
+                deliveredTime: null,
             };
             state.list.unshift(newOrder); 
         },
-        
         assignOrder: (state, action) => {
             const { orderId, riderId, riderName } = action.payload;
             const order = state.list.find(o => o.id === orderId);
@@ -71,41 +80,39 @@ const ordersSlice = createSlice({
                 order.status = 'Asignada'; 
             }
         },
-        
+        startOrder: (state, action) => {
+            const orderId = action.payload;
+            const order = state.list.find(o => o.id === orderId);
+            if (order && order.status === 'Asignada') {
+                order.status = 'En camino';
+                order.pickupTime = new Date().toISOString();
+            }
+        },
+        completeOrder: (state, action) => {
+            const orderId = action.payload;
+            const order = state.list.find(o => o.id === orderId);
+            if (order && order.status === 'En camino') {
+                order.status = 'Completada';
+                order.deliveredTime = new Date().toISOString();
+            }
+        },
         cancelOrder: (state, action) => {
             const order = state.list.find(o => o.id === action.payload);
             if (order) {
                 order.status = 'Cancelada'; 
                 order.riderId = null;
-                order.riderName = null;
             }
         },
-        
         deleteOrder: (state, action) => {
             state.list = state.list.filter(order => order.id !== action.payload); 
         },
-        
-        completeOrder: (state, action) => {
-            const orderId = action.payload;
-            const order = state.list.find(o => o.id === orderId);
-            
-            if (order && order.status !== 'Completada' && order.riderId) {
-                order.status = 'Completada';
-                // FUTURO: order.deliveredTime = new Date().toISOString(); 
-            }
-        },
-        
-        // Simulación de acción que usaré después
-        requestRiderActivation: () => { /* No hace nada en este slice POR AHORA */ },
+        requestRiderActivation: () => {},
     },
 });
 
 export const { 
-    addOrder, 
-    assignOrder, 
-    cancelOrder, 
-    deleteOrder, 
-    completeOrder,
+    addOrder, assignOrder, cancelOrder, deleteOrder, 
+    startOrder, completeOrder,
     requestRiderActivation 
 } = ordersSlice.actions;
 

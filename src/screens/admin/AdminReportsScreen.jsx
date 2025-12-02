@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
@@ -42,6 +42,7 @@ const getWeeklyReport = (orders, startDate, endDate) => {
                         break;
                     case 'Pendiente':
                     case 'Asignada':
+                    case 'En camino':
                         weeklyData[weekKey].pendingOrders += 1;
                         break;
                 }
@@ -63,6 +64,37 @@ export default function AdminReportsScreen() {
 
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+    const calculateDeliveryAverage = () => {
+        const completedOrdersWithTime = allOrders.filter(order => {
+            const orderDate = moment(order.createdAt);
+            const isInRange = orderDate.isBetween(moment(startDate).startOf('day'), moment(endDate).endOf('day'), null, '[]');
+            
+            return isInRange && order.status === 'Completada' && order.pickupTime && order.deliveredTime;
+        });
+
+        if (completedOrdersWithTime.length === 0) return "N/A";
+
+        let totalMinutes = 0;
+        completedOrdersWithTime.forEach(order => {
+            const start = moment(order.pickupTime);
+            const end = moment(order.deliveredTime);
+            const duration = end.diff(start, 'minutes');
+            if (duration > 0) totalMinutes += duration;
+        });
+
+        const averageMinutes = Math.round(totalMinutes / completedOrdersWithTime.length);
+        
+        if (averageMinutes >= 60) {
+            const hours = Math.floor(averageMinutes / 60);
+            const mins = averageMinutes % 60;
+            return `${hours}h ${mins}min`;
+        }
+        return `${averageMinutes} min`;
+    };
+
+    const averageDeliveryTime = useMemo(() => calculateDeliveryAverage(), [allOrders, startDate, endDate]);
+    //------------------------------------------------------------;)
 
     const weeklyReport = useMemo(() => {
         return getWeeklyReport(allOrders, startDate, endDate);
@@ -99,11 +131,11 @@ export default function AdminReportsScreen() {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 
-                <Text style={styles.header}>📊 Resumen de Reportes</Text>
+                <Text style={styles.header}>Resumen de reportes</Text>
                 
                 {/* SECCIÓN DE FILTROS */}
                 <View style={styles.filterSection}>
-                    <Text style={styles.sectionTitle}>Filtro de Rango de Fechas</Text>
+                    <Text style={styles.sectionTitle}>Filtro de rango de fechas</Text>
                     
                     <View style={styles.datePickerRow}>
                         
@@ -144,27 +176,31 @@ export default function AdminReportsScreen() {
                 <View style={styles.separator} />
                 
                 {/* KPIs GLOBALES */}
-                <Text style={styles.sectionTitle}>Indicadores Clave del Período</Text>
+                <Text style={styles.sectionTitle}>Indicadores clave del período</Text>
                 <View style={styles.kpiContainer}>
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiValue}>{totalOrders}</Text>
-                        <Text style={styles.kpiLabel}>Órdenes Totales</Text>
+                        <Text style={styles.kpiLabel}>Órdenes totales</Text>
                     </View>
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiValue}>{totalCompleted}</Text>
-                        <Text style={styles.kpiLabel}>Órdenes Completadas</Text>
+                        <Text style={styles.kpiLabel}>Órdenes completadas</Text>
                     </View>
                 </View>
                 <View style={styles.kpiContainer}>
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiValueRevenue}>${totalRevenue.toFixed(2)}</Text>
-                        <Text style={styles.kpiLabel}>Ingreso Delivery (Est.)</Text>
+                        <Text style={styles.kpiLabel}>Ingreso delivery (Est.)</Text>
                     </View>
-                    <View style={styles.kpiCardPlaceholder}>
-                        <Text style={styles.kpiPlaceholderText}>Promedio de Tiempo de Entrega</Text>
-                        <Text style={styles.kpiPlaceholderValue}>--:--</Text>
-                        <Text style={styles.kpiPlaceholderSubtext}>(Pendiente por implementar)</Text>
+                    
+                    {/* 🚀 TARJETA DE PROMEDIO DE TIEMPO DE ENTREGA (ACTUALIZADA) */}
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiValueAverage}>{averageDeliveryTime}</Text>
+                        <Text style={styles.kpiLabel}>Promedio tiempo de entrega</Text>
+                        <Text style={styles.kpiSubLabel}>(Recolección ➔ Entrega)</Text>
                     </View>
+                    {/* FIN DE TARJETA ACTUALIZADA */}
+
                 </View>
 
                 <View style={styles.separator} />
@@ -173,7 +209,7 @@ export default function AdminReportsScreen() {
                 <Text style={styles.sectionTitle}>Resumen de órdenes semanal</Text>
                 
                 {weeklyReport.length === 0 ? (
-                    <Text style={styles.emptyText}>No hay datos en el rango seleccionado.</Text>
+                    <Text style={styles.emptyText}>No hay datos en el rango seleccionado</Text>
                 ) : (
                     weeklyReport.map((week, index) => (
                         <View key={index} style={styles.weekCard}>
@@ -221,7 +257,6 @@ const styles = StyleSheet.create({
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#00A89C', marginBottom: 10 },
     emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
 
-    // Filtros
     filterSection: { padding: 10, backgroundColor: 'white', borderRadius: 10, elevation: 1 },
     datePickerRow: { flexDirection: 'row', justifyContent: 'space-between' },
     dateInputContainer: { flex: 1, marginHorizontal: 5 },
@@ -231,7 +266,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff', alignItems: 'center',
     },
 
-    // KPIs
     kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
     kpiCard: {
         flex: 1, backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 5,
@@ -241,7 +275,10 @@ const styles = StyleSheet.create({
     kpiValueRevenue: { fontSize: 32, fontWeight: 'bold', color: '#00A89C' },
     kpiLabel: { fontSize: 14, color: '#555', marginTop: 5, textAlign: 'center' },
     
-    kpiCardPlaceholder: { // Estilo para el área de tiempo de entrega (pendiente)
+    kpiValueAverage: { fontSize: 28, fontWeight: 'bold', color: '#333' }, 
+    kpiSubLabel: { fontSize: 10, color: '#999', marginTop: 2 },
+
+    kpiCardPlaceholder: {
         flex: 1, backgroundColor: '#eee', padding: 15, borderRadius: 10, marginHorizontal: 5,
         alignItems: 'center', justifyContent: 'center', elevation: 2,
     },
@@ -249,7 +286,7 @@ const styles = StyleSheet.create({
     kpiPlaceholderValue: { fontSize: 28, fontWeight: 'bold', color: '#888' },
     kpiPlaceholderSubtext: { fontSize: 12, color: '#888', marginTop: 3 },
 
-    // --- Reporte Semanal ---
+    // Reporte semanal
     weekCard: {
         backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10,
         elevation: 1,
@@ -263,10 +300,9 @@ const styles = StyleSheet.create({
     weekDetailValuePending: { fontSize: 14, fontWeight: 'bold', color: '#FF7F00' },
     weekDetailValueRevenue: { fontSize: 14, fontWeight: 'bold', color: '#00A89C' },
 
-    // --- Botón de Descarga ---
     downloadButton: {
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#ccc', // Desactivado por ahora
+        backgroundColor: '#ccc',
         paddingVertical: 15, alignItems: 'center',
     },
     downloadButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },

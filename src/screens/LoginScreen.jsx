@@ -12,7 +12,6 @@ export default function LoginScreen({ navigation }) {
     const [password, setPassword] = useState('');
 
     const handleLogin = () => {
-        // 1. Validación de campos
         if (!email || !password) {
             Alert.alert('Error', 'Por favor completa todos los campos.');
             return;
