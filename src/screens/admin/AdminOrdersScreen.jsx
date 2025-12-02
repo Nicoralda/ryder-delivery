@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { Picker } from '@react-native-picker/picker'; 
@@ -7,9 +7,9 @@ import { addOrder, assignOrder, cancelOrder, deleteOrder, requestRiderActivation
 export default function AdminOrdersScreen() {
   const dispatch = useDispatch();
   const { list: allOrders, ryders } = useSelector(state => state.orders); 
+  const routes = useSelector(state => state.routes.list); 
 
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
   const recentOrders = allOrders.filter(order => {
     const creationDate = new Date(order.createdAt);
     return creationDate >= twentyFourHoursAgo;
@@ -19,6 +19,10 @@ export default function AdminOrdersScreen() {
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
+
+  const [selectedZoneId, setSelectedZoneId] = useState('');
+  const [deliveryCost, setDeliveryCost] = useState('0.00');
+
   const [paymentMethod, setPaymentMethod] = useState('Bolívares');
   const [needsChange, setNeedsChange] = useState('No'); 
   const [changeAmount, setChangeAmount] = useState('');
@@ -27,18 +31,34 @@ export default function AdminOrdersScreen() {
   const [currentOrderToAssign, setCurrentOrderToAssign] = useState(null);
   const [selectedRiderId, setSelectedRiderId] = useState('');
 
+  useEffect(() => {
+    const selectedRoute = routes.find(r => r.id === selectedZoneId);
+    if (selectedRoute) {
+      setDeliveryCost(selectedRoute.price);
+    } else {
+      setDeliveryCost('0.00');
+    }
+  }, [selectedZoneId, routes]);
+
+
   const handleCreateOrder = () => {
-    if (!customerName || !phone || !location || !paymentMethod) {
-      Alert.alert('Error', 'Debe completar el nombre, teléfono y ubicación');
+    if (!customerName || !phone || !location || !selectedZoneId) { 
+      Alert.alert('Error', 'Debe completar nombre, teléfono, ubicación y seleccionar una zona');
       return;
     }
+    
     if (needsChange === 'Sí' && (!changeAmount || isNaN(parseFloat(changeAmount)))) {
       Alert.alert('Error', 'Especifique la cantidad del vuelto');
       return;
     }
 
+    const selectedZone = routes.find(r => r.id === selectedZoneId);
+    
     const orderData = {
-      customerName, phone, location, paymentMethod, 
+      customerName, phone, location, 
+      zoneName: selectedZone.name,
+      deliveryCost: deliveryCost,
+      paymentMethod, 
       needsChange, 
       changeAmount: needsChange === 'Sí' ? changeAmount : null,
     };
@@ -46,6 +66,12 @@ export default function AdminOrdersScreen() {
     dispatch(addOrder(orderData));
     setOrderModalVisible(false);
     resetForm();
+  };
+  
+  const resetForm = () => {
+    setCustomerName(''); setPhone(''); setLocation('');
+    setSelectedZoneId(''); setDeliveryCost('0.00');
+    setPaymentMethod('Bolívares'); setNeedsChange('No'); setChangeAmount('');
   };
 
   const handleOpenAssignment = (order) => {
@@ -60,7 +86,7 @@ export default function AdminOrdersScreen() {
     const rider = ryders.find(r => r.id === selectedRiderId);
     
     if (rider.status !== 'Activo') {
-        Alert.alert('Rider inactivo', `${rider.name} no está activo. Usa el botón "Solicitar activación"`);
+        Alert.alert('Rider inactivo', `${rider.name} no está activo. Use el botón "Solicitar activación"`);
         return;
     }
 
@@ -75,10 +101,10 @@ export default function AdminOrdersScreen() {
   const handleCancelOrder = (orderId) => {
     Alert.alert(
         "Cancelar orden",
-        "¿Está seguro que desea CANCELAR la orden? Esto no la eliminará, solo cambiará su estado",
+        "¿Está seguro de que desea CANCELAR la orden? Esto no la eliminará, solo cambiará su estado",
         [
             { text: "No", style: "cancel" },
-            { text: "Sí, cancelar", onPress: () => dispatch(cancelOrder(orderId)), style: "destructive" }
+            { text: "Sí, Cancelar", onPress: () => dispatch(cancelOrder(orderId)), style: "destructive" }
         ]
     );
   };
@@ -86,10 +112,10 @@ export default function AdminOrdersScreen() {
   const handleDeleteOrder = (orderId) => {
     Alert.alert(
         "Eliminar orden",
-        "¿Está seguro que desea ELIMINAR la orden? Se borrará permanentemente",
+        "¿Está seguro de que desea ELIMINAR la orden? Se borrará permanentemente",
         [
             { text: "No", style: "cancel" },
-            { text: "Sí, eliminar", onPress: () => dispatch(deleteOrder(orderId)), style: "destructive" }
+            { text: "Sí, Eliminar", onPress: () => dispatch(deleteOrder(orderId)), style: "destructive" }
         ]
     );
   };
@@ -98,18 +124,10 @@ export default function AdminOrdersScreen() {
       dispatch(requestRiderActivation(riderId));
   };
   
-  const resetForm = () => {
-    setCustomerName(''); setPhone(''); setLocation('');
-    setPaymentMethod('Bolívares'); setNeedsChange('No'); setChangeAmount('');
-  };
-
-  // Riders activos para el filtro de asignación
   const activeRyders = ryders.filter(r => r.status === 'Activo');
   const inactiveRyders = ryders.filter(r => r.status === 'Inactivo');
   
-  // --- Renderizado de cada Orden ---
   const renderItem = ({ item }) => {
-    
     let statusStyle;
     switch (item.status) {
         case 'Pendiente': statusStyle = styles.pending; break;
@@ -123,7 +141,8 @@ export default function AdminOrdersScreen() {
             <View style={styles.cardInfo}>
                 <Text style={styles.orderNumber}># {item.orderNumber}</Text>
                 <Text style={styles.cardTitle}>{item.customerName}</Text>
-                <Text style={styles.cardDetail}>📞 {item.phone}</Text>
+                <Text style={styles.cardDetail}>📦 Zona: {item.zoneName}</Text> 
+                <Text style={styles.cardPrice}>💵 Costo delivery: ${parseFloat(item.deliveryCost).toFixed(2)}</Text> 
                 <Text style={styles.cardDetail}>Pago: {item.paymentMethod} {item.needsChange === 'Sí' ? `(Vuelto: $${item.changeAmount})` : ''}</Text>
                 <Text style={[styles.status, statusStyle]}>
                     Estado: {item.status}
@@ -132,7 +151,6 @@ export default function AdminOrdersScreen() {
             </View>
             <View style={styles.cardActions}>
                 
-                {/* Asignar / Reasignar */}
                 {item.status !== 'Cancelada' && (
                     <TouchableOpacity 
                         onPress={() => handleOpenAssignment(item)} 
@@ -142,7 +160,6 @@ export default function AdminOrdersScreen() {
                     </TouchableOpacity>
                 )}
 
-                {/* Cancelar (Si no está ya cancelada) */}
                 {item.status !== 'Cancelada' && (
                     <TouchableOpacity 
                         onPress={() => handleCancelOrder(item.id)} 
@@ -152,7 +169,6 @@ export default function AdminOrdersScreen() {
                     </TouchableOpacity>
                 )}
 
-                {/* Eliminar (Siempre visible para el Admin) */}
                 <TouchableOpacity 
                     onPress={() => handleDeleteOrder(item.id)} 
                     style={styles.actionBtnDelete}
@@ -173,43 +189,63 @@ export default function AdminOrdersScreen() {
         style={styles.floatingButton}
         onPress={() => setOrderModalVisible(true)}
       >
-        <Text style={styles.floatingButtonText}>+ Crear Orden</Text>
+        <Text style={styles.floatingButtonText}>+ Crear orden</Text>
       </TouchableOpacity>
 
       <FlatList
-        data={recentOrders} 
+        data={recentOrders}
         keyExtractor={item => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ padding: 15 }}
+        contentContainerStyle={{ padding: 15, paddingBottom: 100 }}
         ListEmptyComponent={() => (
-            <Text style={styles.emptyText}>No hay órdenes creadas hoy.</Text>
+            <Text style={styles.emptyText}>No hay órdenes creadas hoy</Text>
         )}
       />
 
       <Modal animationType="slide" transparent={true} visible={orderModalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Crear Nueva Orden</Text>
+                <Text style={styles.modalTitle}>Crear nueva orden</Text>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
-                    <TextInput placeholder="Nombre del Cliente" style={styles.input} value={customerName} onChangeText={setCustomerName} />
+                    <TextInput placeholder="Nombre del cliente" style={styles.input} value={customerName} onChangeText={setCustomerName} />
                     <TextInput placeholder="Teléfono" style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
                     <TextInput placeholder="Ubicación (Coordenadas/URL Maps)" style={styles.input} value={location} onChangeText={setLocation} multiline />
 
-                    <Text style={styles.label}>Método de Pago:</Text>
+                    <Text style={styles.label}>Zona de delivery:</Text>
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            selectedValue={selectedZoneId}
+                            onValueChange={(itemValue) => setSelectedZoneId(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="---Seleccionar zona---" value="" />
+                            {routes.map(r => (
+                                <Picker.Item 
+                                    key={r.id} 
+                                    label={`${r.name} ($${r.price})`} 
+                                    value={r.id} 
+                                />
+                            ))}
+                        </Picker>
+                    </View>
+                    
+                    <Text style={styles.priceDisplay}>Costo de delivery: ${parseFloat(deliveryCost).toFixed(2)}</Text>
+
+                    <Text style={styles.label}>Método de pago:</Text>
                     <View style={styles.pickerContainer}>
                         <Picker
                             selectedValue={paymentMethod}
                             onValueChange={(itemValue) => setPaymentMethod(itemValue)}
                             style={styles.picker}
                         >
-                            <Picker.Item label="Bolívares Digital" value="Bolívares" />
-                            <Picker.Item label="Divisa Efectivo ($)" value="Divisa Efectivo" />
+                            <Picker.Item label="Bolívares digital" value="Bolívares" />
+                            <Picker.Item label="Divisa efectivo ($)" value="Divisa Efectivo" />
                         </Picker>
                     </View>
 
                     {paymentMethod === 'Divisa Efectivo' && (
                         <>
-                            <Text style={styles.label}>¿Necesita Vuelto?</Text>
+                            <Text style={styles.label}>¿Necesita vuelto?</Text>
                             <View style={styles.pickerContainer}>
                                 <Picker
                                     selectedValue={needsChange}
@@ -235,11 +271,11 @@ export default function AdminOrdersScreen() {
                 </ScrollView>
                 
                 <View style={styles.modalButtons}>
-                    <TouchableOpacity onPress={() => setOrderModalVisible(false)} style={[styles.btn, styles.btnCancel]}>
+                    <TouchableOpacity onPress={() => {setOrderModalVisible(false); resetForm();}} style={[styles.btn, styles.btnCancel]}>
                         <Text style={styles.btnText}>Cancelar</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleCreateOrder} style={[styles.btn, styles.btnSave]}>
-                        <Text style={styles.btnText}>Crear Orden</Text>
+                        <Text style={styles.btnText}>Crear orden</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -249,9 +285,9 @@ export default function AdminOrdersScreen() {
       <Modal animationType="fade" transparent={true} visible={assignmentModalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Asignar Orden #{currentOrderToAssign?.orderNumber}</Text>
+                <Text style={styles.modalTitle}>Asignar orden{currentOrderToAssign?.orderNumber}</Text>
                 
-                <Text style={styles.label}>Riders Activos:</Text>
+                <Text style={styles.label}>Riders activos:</Text>
                 <View style={styles.pickerContainer}>
                     <Picker
                         selectedValue={selectedRiderId}
@@ -265,8 +301,7 @@ export default function AdminOrdersScreen() {
                     </Picker>
                 </View>
 
-                {/* Sección de solicitud de activación */}
-                <Text style={styles.label}>Riders Inactivos:</Text>
+                <Text style={styles.label}>Riders inactivos:</Text>
                 {inactiveRyders.map(r => (
                     <View key={r.id} style={styles.inactiveRiderRow}>
                         <Text style={styles.inactiveRiderText}>{r.name}</Text>
@@ -274,7 +309,7 @@ export default function AdminOrdersScreen() {
                             onPress={() => handleRequestActivation(r.id)} 
                             style={styles.requestActivationButton}
                         >
-                            <Text style={styles.requestActivationText}>Solicitar Activación</Text>
+                            <Text style={styles.requestActivationText}>Solicitar activación</Text>
                         </TouchableOpacity>
                     </View>
                 ))}
@@ -284,7 +319,7 @@ export default function AdminOrdersScreen() {
                         <Text style={styles.btnText}>Cerrar</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleAssignRider} style={[styles.btn, styles.btnSave]}>
-                        <Text style={styles.btnText}>Confirmar Asignación</Text>
+                        <Text style={styles.btnText}>Confirmar asignación</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -313,12 +348,12 @@ const styles = StyleSheet.create({
     orderNumber: { fontSize: 18, fontWeight: 'bold', color: '#00A89C' },
     cardTitle: { fontSize: 16, fontWeight: 'bold', marginTop: 5 },
     cardDetail: { fontSize: 14, color: '#555' },
+    cardPrice: { fontSize: 15, fontWeight: 'bold', color: '#00A89C', marginTop: 5 }, 
     
     status: { fontWeight: 'bold', marginTop: 5, paddingVertical: 2, paddingHorizontal: 5, borderRadius: 5, textAlign: 'center' },
     assigned: { backgroundColor: '#e6ffe6', color: '#00a800' },
     pending: { backgroundColor: '#ffffee', color: '#cc9900' },
     cancelled: { backgroundColor: '#ffcccc', color: '#cc0000' }, 
-    defaultStatus: { backgroundColor: '#ddd', color: '#333' },
 
     riderName: { fontSize: 14, color: '#333', marginTop: 5 },
     cardActions: { justifyContent: 'center', minWidth: 80 },
@@ -336,6 +371,7 @@ const styles = StyleSheet.create({
     label: { fontSize: 14, color: '#555', marginBottom: 5, fontWeight: 'bold' },
     pickerContainer: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 15 },
     picker: { height: 50, width: '100%' },
+    priceDisplay: { fontSize: 18, fontWeight: 'bold', color: '#FF7F00', marginVertical: 10 }, 
 
     modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 },
     btn: { flex: 1, padding: 12, borderRadius: 8, marginHorizontal: 5, alignItems: 'center' },
