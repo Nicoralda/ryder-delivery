@@ -10,22 +10,29 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: initialState,
     reducers: {
-        login: (state, action) => {
-            const { username, password } = action.payload;
+        // Renombramos 'login' a 'loginSuccess' para compatibilidad con tus pantallas
+        loginSuccess: (state, action) => {
+            const { role, email, name } = action.payload;
 
-            //Lógica de autenticación por roles
-            if (username === 'admin' && password === 'admin') {
-                state.isAuthenticated = true;
-                state.user = { id: 'ADM001', name: 'Admin Principal' };
-                state.role = 'Admin';
-            } else if (username === 'rider' && password === 'rider') {
-                state.isAuthenticated = true;
-                state.user = { id: 'R001', name: 'Ricardo Pérez' };
-                state.role = 'Ryder';
+            state.isAuthenticated = true;
+            state.role = role; // Guardamos el rol que viene del LoginScreen ('admin' o 'rider')
+            
+            // Asignamos datos de usuario simulados basados en el rol
+            if (role === 'admin') {
+                state.user = { 
+                    id: 'ADM001', 
+                    fullName: name || 'Admin Principal', 
+                    email: email || 'admin@ryders.com',
+                    role: 'Admin'
+                };
             } else {
-                console.log('Credenciales inválidas');
+                state.user = { 
+                    id: 'R001', 
+                    fullName: name || 'Ricardo Pérez', 
+                    email: email || 'rider@ryders.com',
+                    role: 'Ryder' // Asegúrate que coincida con el check en RootNavigator
+                };
             }
-            //---------------------------------------
         },
         logout: (state) => {
             state.isAuthenticated = false;
@@ -33,13 +40,13 @@ const authSlice = createSlice({
             state.role = null;
         },
         updateRiderID: (state, action) => {
-            if (state.role === 'Ryder' && state.user) {
+            if (state.role === 'rider' && state.user) {
                 state.user.id = action.payload;
             }
         }
     },
 });
 
-export const { login, logout, updateRiderID } = authSlice.actions;
+export const { loginSuccess, logout, updateRiderID } = authSlice.actions;
 
 export default authSlice.reducer;

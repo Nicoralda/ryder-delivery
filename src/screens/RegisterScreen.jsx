@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useDispatch } from 'react-redux';
-
-import { loginSuccess } from '../store/AuthSlice'; 
+import { loginSuccess } from '../store/AuthSlice';
 
 export default function RegisterScreen({ navigation }) {
     const dispatch = useDispatch();
@@ -18,25 +17,23 @@ export default function RegisterScreen({ navigation }) {
             return;
         }
 
-        dispatch(loginSuccess({ role }));
+        const roleForRedux = role === 'admin' ? 'Admin' : 'Ryder';
 
-        if (role === 'rider') {
-            navigation.replace('RiderStack');
-        } else {
-            navigation.replace('AdminStack');
-        }
+        dispatch(loginSuccess({ 
+            role: roleForRedux,
+            name: name,
+            email: email
+        }));
     };
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
                 <Text style={styles.title}>Ryders Delivery</Text>
-                
                 <Text style={styles.subtitle}>
                     Crea tu cuenta como {role === 'rider' ? 'Repartidor' : 'Administrador'}
                 </Text>
 
-                {/* Tabs de rol */}
                 <View style={styles.tabs}>
                     <TouchableOpacity
                         style={[styles.tab, role === 'rider' && styles.activeTab]}
@@ -52,38 +49,14 @@ export default function RegisterScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                {/* Formulario */}
-                <TextInput
-                    style={styles.input}
-                    placeholder="Nombre Completo"
-                    value={name}
-                    onChangeText={setName}
-                    placeholderTextColor="#777"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Correo Electrónico"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    placeholderTextColor="#777"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    placeholderTextColor="#777"
-                />
+                <TextInput style={styles.input} placeholder="Nombre Completo" value={name} onChangeText={setName} placeholderTextColor="#777"/>
+                <TextInput style={styles.input} placeholder="Correo Electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#777"/>
+                <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor="#777"/>
 
-                {/* Botón de registro */}
                 <TouchableOpacity style={styles.registerButton} onPress={handleRegister} activeOpacity={0.8}>
                     <Text style={styles.registerText}>Crear Cuenta</Text>
                 </TouchableOpacity>
 
-                {/* Botón de login */}
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={styles.loginText}>Ya tengo una cuenta. Iniciar Sesión</Text>
                 </TouchableOpacity>
@@ -93,76 +66,17 @@ export default function RegisterScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scrollContainer: {
-        flexGrow: 1, 
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-    },
-    container: { 
-        padding: 24, 
-        paddingTop: 80, 
-        paddingBottom: 40,
-    },
-    title: { 
-        fontSize: 32, 
-        fontWeight: 'bold', 
-        textAlign: 'center', 
-        marginBottom: 10,
-        color: '#333',
-    },
-    subtitle: { 
-        fontSize: 16, 
-        textAlign: 'center', 
-        marginBottom: 30,
-        color: '#555',
-    },
-    tabs: { 
-        flexDirection: 'row', 
-        justifyContent: 'center', 
-        marginBottom: 20,
-    },
-    tab: { 
-        padding: 10, 
-        marginHorizontal: 10, 
-        borderBottomWidth: 2, 
-        borderBottomColor: 'transparent',
-    },
-    activeTab: { 
-        borderBottomColor: '#00A89C', 
-    },
-    tabText: { 
-        fontSize: 16,
-        color: '#777',
-    },
-    activeText: {
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    input: { 
-        borderWidth: 1, 
-        borderColor: '#ccc', 
-        borderRadius: 8, 
-        padding: 12, 
-        marginBottom: 15,
-        fontSize: 16,
-        color: '#333',
-    },
-    registerButton: { 
-        backgroundColor: '#00A89C', 
-        padding: 14, 
-        borderRadius: 8, 
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    registerText: { 
-        color: '#fff', 
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-    loginText: { 
-        textAlign: 'center', 
-        marginTop: 20, 
-        color: '#FF7F00', 
-        fontSize: 14,
-    }
+    scrollContainer: { flexGrow: 1, justifyContent: 'center', backgroundColor: '#fff' },
+    container: { padding: 24, paddingTop: 80, paddingBottom: 40 },
+    title: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 10, color: '#333' },
+    subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 30, color: '#555' },
+    tabs: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
+    tab: { padding: 10, marginHorizontal: 10, borderBottomWidth: 2, borderBottomColor: 'transparent' },
+    activeTab: { borderBottomColor: '#00A89C' },
+    tabText: { fontSize: 16, color: '#777' },
+    activeText: { fontWeight: 'bold', color: '#333' },
+    input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 15, fontSize: 16, color: '#333' },
+    registerButton: { backgroundColor: '#00A89C', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 10 },
+    registerText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
+    loginText: { textAlign: 'center', marginTop: 20, color: '#FF7F00', fontSize: 14 }
 });
