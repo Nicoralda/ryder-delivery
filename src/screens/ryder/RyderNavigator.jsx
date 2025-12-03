@@ -2,12 +2,12 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useDispatch } from 'react-redux';
-import { logout } from '../store/AuthSlice';
+import { logout } from '../../store/AuthSlice';
 
-import RyderMapScreen from '../screens/ryder/RyderMapScreen';
-import RyderOrdersScreen from '../screens/ryder/RyderOrdersScreen';
-import RyderReportsScreen from '../screens/ryder/RyderHistoryScreen';
-import RyderProfileScreen from '../screens/ryder/RyderProfileScreen';
+import RyderMapScreen from './RyderMapScreen';
+import RyderOrdersScreen from './RyderOrdersScreen';
+import RyderHistoryScreen from './RyderHistoryScreen';
+import RyderProfileScreen from './RyderProfileScreen';
 
 const Drawer = createDrawerNavigator();
 
@@ -15,7 +15,6 @@ const CustomDrawerContent = (props) => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-// Añadir luego lógica pa cambiar el estado del rider a desconectado antes de cerrar sesión
     dispatch(logout());
   };
 
@@ -71,9 +70,9 @@ export default function RyderNavigator() {
         options={{ title: 'Perfil' }}
       />
       <Drawer.Screen
-        name="Mis reportes"
-        component={RyderReportsScreen}
-        options={{ title: 'Reportes de pago' }}
+        name="Historial de órdenes"
+        component={RyderHistoryScreen}
+        options={{ title: 'Historial y Pagos' }}
       />
     </Drawer.Navigator>
   );

@@ -15,7 +15,7 @@ const COLORS = {
 export default function AdminProfileScreen() {
     const dispatch = useDispatch();
     
-    // 1. Datos del Usuario (Simulados con Redux o asumidos si ya tienes un 'userSlice')
+    // Datos del usuario (simulados con Redux por ahora)
     // Asumimos que los datos del usuario logeado están en auth.user
     const user = useSelector(state => state.auth.user) || {
         fullName: 'Administrator Global',
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     roleValue: { color: COLORS.primary, fontWeight: 'bold' },
     separator: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 5 },
 
-    // Cambiar el tema (por los momentos lo simulo)
+    // Cambiar el tema (por los momentos lo simulo solamente)
     themeRow: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
@@ -166,7 +166,6 @@ const styles = StyleSheet.create({
     themeInfo: { flexDirection: 'row', alignItems: 'center' },
     themeSwitcher: { flexDirection: 'row', alignItems: 'center' },
 
-    // --- Botón de Cerrar Sesión ---
     logoutButton: {
         flexDirection: 'row',
         backgroundColor: COLORS.danger,
