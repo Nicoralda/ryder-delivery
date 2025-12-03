@@ -16,7 +16,6 @@ export default function AdminProfileScreen() {
     const dispatch = useDispatch();
     
     // Datos del usuario (simulados con Redux por ahora)
-    // Asumimos que los datos del usuario logeado están en auth.user
     const user = useSelector(state => state.auth.user) || {
         fullName: 'Administrator Global',
         email: 'admin@deliveryapp.com',

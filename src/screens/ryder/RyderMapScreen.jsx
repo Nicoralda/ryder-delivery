@@ -97,7 +97,7 @@ export default function RyderMapScreen() {
                             pinColor="#FF7F00"
                         />
                         
-                        {/* Marcador de Destino (simulando) */}
+                        {/* Marcador de destino (simulando) */}
                         {currentRoute && (
                             <Marker
                                 coordinate={{ latitude: location.latitude + 0.005, longitude: location.longitude + 0.002 }}
