@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, A
 import { useSelector, useDispatch } from 'react-redux';
 import { addRoute, updateRoute, deleteRoute } from '../../store/routesSlice';
 
-export default function AdminPricesScreen() { 
+export default function AdminPricesScreen() {
   const dispatch = useDispatch();
-  const routes = useSelector(state => state.routes.list); 
+  const routes = useSelector(state => state.routes.list);
+
 
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
-  
+
   const [name, setName] = useState('');
   const [zones, setZones] = useState('');
   const [price, setPrice] = useState('');
@@ -74,10 +75,10 @@ export default function AdminPricesScreen() {
       </View>
       <View style={styles.cardActions}>
         <TouchableOpacity onPress={() => openEdit(item)} style={styles.actionBtn}>
-            <Text style={{fontSize: 20}}>✏️</Text>
+          <Text style={{ fontSize: 20 }}>✏️</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.actionBtn}>
-            <Text style={{fontSize: 20}}>🗑️</Text>
+          <Text style={{ fontSize: 20 }}>🗑️</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -85,8 +86,8 @@ export default function AdminPricesScreen() {
 
   return (
     <View style={styles.container}>
-      
-      {/* 1. SECCIÓN DEL MAPA (simulada - TENGO QUE CAMBIARO DESPUÉS) */}
+
+      {/* 1. SECCIÓN DEL MAPA (simulada) */}
       <View style={styles.mapContainer}>
         <Text style={styles.mapText}>🗺️ Mapa de Rutas de Caracas</Text>
         <Text style={styles.mapSubtext}>(Integración de Google Maps aquí)</Text>
@@ -94,10 +95,10 @@ export default function AdminPricesScreen() {
 
       <View style={styles.listContainer}>
         <View style={styles.listHeader}>
-            <Text style={styles.headerTitle}>Rutas Activas</Text>
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-                <Text style={styles.addButtonText}>+ Nueva Ruta</Text>
-            </TouchableOpacity>
+          <Text style={styles.headerTitle}>Rutas activas</Text>
+          <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+            <Text style={styles.addButtonText}>+ Nueva ruta</Text>
+          </TouchableOpacity>
         </View>
 
         <FlatList
@@ -110,34 +111,34 @@ export default function AdminPricesScreen() {
 
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>{isEditing ? 'Editar ruta' : 'Crear nueva ruta'}</Text>
-                
-                <TextInput 
-                    placeholder="Nombre (ej. Zona del Este)" 
-                    style={styles.input} 
-                    value={name} onChangeText={setName} 
-                />
-                <TextInput 
-                    placeholder="Zonas (ej. Chacao, Altamira...)" 
-                    style={styles.input} 
-                    value={zones} onChangeText={setZones} multiline
-                />
-                <TextInput 
-                    placeholder="Precio (ej. 5.00)" 
-                    style={styles.input} 
-                    value={price} onChangeText={setPrice} keyboardType="numeric"
-                />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{isEditing ? 'Editar ruta' : 'Crear nueva ruta'}</Text>
 
-                <View style={styles.modalButtons}>
-                    <TouchableOpacity onPress={closeModal} style={[styles.btn, styles.btnCancel]}>
-                        <Text style={styles.btnText}>Cancelar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleSave} style={[styles.btn, styles.btnSave]}>
-                        <Text style={styles.btnText}>Guardar</Text>
-                    </TouchableOpacity>
-                </View>
+            <TextInput
+              placeholder="Nombre (ej. Zona del Este)"
+              style={styles.input}
+              value={name} onChangeText={setName}
+            />
+            <TextInput
+              placeholder="Zonas (ej. Chacao, Altamira...)"
+              style={styles.input}
+              value={zones} onChangeText={setZones} multiline
+            />
+            <TextInput
+              placeholder="Precio (ej. 5.00)"
+              style={styles.input}
+              value={price} onChangeText={setPrice} keyboardType="numeric"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={closeModal} style={[styles.btn, styles.btnCancel]}>
+                <Text style={styles.btnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} style={[styles.btn, styles.btnSave]}>
+                <Text style={styles.btnText}>Guardar</Text>
+              </TouchableOpacity>
             </View>
+          </View>
         </View>
       </Modal>
 
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10, flexDirection: 'row',
-    justifyContent: 'space-between', elevation: 3, shadowColor: '#000', shadowOffset: {width:0, height:2}, shadowOpacity: 0.1,
+    justifyContent: 'space-between', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1,
   },
   cardInfo: { flex: 1, marginRight: 10 },
   cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#00A89C' },

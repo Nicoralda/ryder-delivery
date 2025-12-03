@@ -4,11 +4,11 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/AuthSlice';
 
-import AdminPricesScreen from './AdminPricesScreen';
+import AdminPricesScreen from './AdminPricesScreen.jsx';
 import AdminOrdersScreen from './AdminOrdersScreen.jsx';
-import AdminRydersScreen from './AdminRydersScreen';
-import AdminReportsScreen from './AdminReportsScreen'; 
-import AdminProfileScreen from './AdminProfileScreen';
+import AdminRydersScreen from './AdminRydersScreen.jsx';
+import AdminReportsScreen from './AdminReportsScreen.jsx'; 
+import AdminProfileScreen from './AdminProfileScreen.jsx';
 
 const Drawer = createDrawerNavigator();
 

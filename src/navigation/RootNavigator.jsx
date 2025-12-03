@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 import AdminNavigator from '../screens/admin/AdminNavigator';
 import RyderNavigator from '../screens/ryder/RyderNavigator';
 
@@ -18,11 +19,12 @@ export default function RootNavigator() {
             <NavigationContainer>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="Login" component={LoginScreen} />
+                    <Stack.Screen name="Register" component={RegisterScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         );
     }
-
+    
     return (
         <NavigationContainer>
             {role === 'Admin' ? (
@@ -31,7 +33,7 @@ export default function RootNavigator() {
                 <RyderNavigator />
             ) : (
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="LoginFallback" component={LoginScreen} />
+                    <Stack.Screen name="Error" component={LoginScreen} />
                 </Stack.Navigator>
             )}
         </NavigationContainer>
