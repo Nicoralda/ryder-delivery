@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
+import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import AdminNavigator from '../screens/admin/AdminNavigator';
@@ -17,14 +18,18 @@ export default function RootNavigator() {
     if (!isAuthenticated) {
         return (
             <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Stack.Navigator
+                    screenOptions={{ headerShown: false }}
+                    initialRouteName="Home"
+                >
+                    <Stack.Screen name="Home" component={HomeScreen} />
                     <Stack.Screen name="Login" component={LoginScreen} />
                     <Stack.Screen name="Register" component={RegisterScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         );
     }
-    
+
     return (
         <NavigationContainer>
             {role === 'Admin' ? (
@@ -33,7 +38,7 @@ export default function RootNavigator() {
                 <RyderNavigator />
             ) : (
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="Error" component={LoginScreen} />
+                    <Stack.Screen name="UnknownRole" component={LoginScreen} />
                 </Stack.Navigator>
             )}
         </NavigationContainer>

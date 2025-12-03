@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useDispatch } from 'react-redux';
 
-import { loginSuccess } from '../store/AuthSlice'; 
+import { loginSuccess } from '../store/AuthSlice';
 
 export default function LoginScreen({ navigation }) {
     const dispatch = useDispatch();
@@ -17,11 +17,10 @@ export default function LoginScreen({ navigation }) {
             return;
         }
 
-        const roleForRedux = role === 'admin' ? 'Admin' : 'Ryder';
-
-        dispatch(loginSuccess({ 
-            role: roleForRedux,
-            email: email
+        dispatch(loginSuccess({
+            role: role,
+            email: email,
+            name: email
         }));
     };
 
@@ -73,7 +72,7 @@ export default function LoginScreen({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={styles.registerText}>¿No tienes cuenta? Registrarse</Text>
+                    <Text style={styles.registerText}>¿No tienes cuenta? Registrate</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

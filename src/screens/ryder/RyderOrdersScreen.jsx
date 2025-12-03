@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
     realData: { fontSize: 16, color: '#333', fontWeight: '500' },
     publicData: { fontSize: 16, color: '#333', fontWeight: '500' },
     
-    // Estilos pal blur
     blurredContainer: { backgroundColor: '#e9ecef', padding: 8, borderRadius: 6, marginTop: 2 },
     blurredText: { color: '#adb5bd', fontSize: 14, fontStyle: 'italic', fontWeight: 'bold' },
 
