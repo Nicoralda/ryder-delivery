@@ -2,148 +2,163 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { addRoute, updateRoute, deleteRoute } from '../../store/routesSlice';
+import MapView from 'react-native-maps';
+
+const DEFAULT_MAP_REGION = {
+    latitude: 10.4806,
+    longitude: -66.9036,
+    latitudeDelta: 0.2,
+    longitudeDelta: 0.2,
+};
 
 export default function AdminPricesScreen() {
-  const dispatch = useDispatch();
-  const routes = useSelector(state => state.routes.list);
+    const dispatch = useDispatch();
+    const routes = useSelector(state => state.routes.list);
+
+    const [mapRegion, setMapRegion] = useState(DEFAULT_MAP_REGION);
 
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentId, setCurrentId] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentId, setCurrentId] = useState(null);
 
-  const [name, setName] = useState('');
-  const [zones, setZones] = useState('');
-  const [price, setPrice] = useState('');
+    const [name, setName] = useState('');
+    const [zones, setZones] = useState('');
+    const [price, setPrice] = useState('');
 
-  const handleSave = () => {
-    if (!name || !zones || !price) {
-      Alert.alert('Epa', 'Completa todos los campos');
-      return;
-    }
+    const handleSave = () => {
+        if (!name || !zones || !price) {
+            Alert.alert('Epa', 'Completa todos los campos');
+            return;
+        }
 
-    const routeData = {
-      id: isEditing ? currentId : Date.now().toString(),
-      name,
-      zones,
-      price
+        const routeData = {
+            id: isEditing ? currentId : Date.now().toString(),
+            name,
+            zones,
+            price
+        };
+
+        if (isEditing) {
+            dispatch(updateRoute(routeData));
+        } else {
+            dispatch(addRoute(routeData));
+        }
+
+        closeModal();
     };
 
-    if (isEditing) {
-      dispatch(updateRoute(routeData));
-    } else {
-      dispatch(addRoute(routeData));
-    }
+    const handleDelete = (id) => {
+        Alert.alert(
+            "Eliminar ruta",
+            "¿Estás seguro?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Eliminar", onPress: () => dispatch(deleteRoute(id)), style: "destructive" }
+            ]
+        );
+    };
 
-    closeModal();
-  };
+    const openEdit = (item) => {
+        setName(item.name);
+        setZones(item.zones);
+        setPrice(item.price);
+        setCurrentId(item.id);
+        setIsEditing(true);
+        setModalVisible(true);
+    };
 
-  const handleDelete = (id) => {
-    Alert.alert(
-      "Eliminar ruta",
-      "¿Estás seguro?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Eliminar", onPress: () => dispatch(deleteRoute(id)), style: "destructive" }
-      ]
-    );
-  };
+    const closeModal = () => {
+        setModalVisible(false);
+        setName('');
+        setZones('');
+        setPrice('');
+        setIsEditing(false);
+    };
 
-  const openEdit = (item) => {
-    setName(item.name);
-    setZones(item.zones);
-    setPrice(item.price);
-    setCurrentId(item.id);
-    setIsEditing(true);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setName('');
-    setZones('');
-    setPrice('');
-    setIsEditing(false);
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardZones}>📍 {item.zones}</Text>
-        <Text style={styles.cardPrice}>💰 ${item.price}</Text>
-      </View>
-      <View style={styles.cardActions}>
-        <TouchableOpacity onPress={() => openEdit(item)} style={styles.actionBtn}>
-          <Text style={{ fontSize: 20 }}>✏️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.actionBtn}>
-          <Text style={{ fontSize: 20 }}>🗑️</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  return (
-    <View style={styles.container}>
-
-      {/* 1. SECCIÓN DEL MAPA (simulada) */}
-      <View style={styles.mapContainer}>
-        <Text style={styles.mapText}>🗺️ Mapa de rutas de Caracas</Text>
-        <Text style={styles.mapSubtext}>(Integración de Google Maps aquí)</Text>
-      </View>
-
-      <View style={styles.listContainer}>
-        <View style={styles.listHeader}>
-          <Text style={styles.headerTitle}>Rutas activas</Text>
-          <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-            <Text style={styles.addButtonText}>+ Nueva ruta</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={routes}
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      </View>
-
-      <Modal animationType="slide" transparent={true} visible={modalVisible}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{isEditing ? 'Editar ruta' : 'Crear nueva ruta'}</Text>
-
-            <TextInput
-              placeholder="Nombre (ej. Zona del Este)"
-              style={styles.input}
-              value={name} onChangeText={setName}
-            />
-            <TextInput
-              placeholder="Zonas (ej. Chacao, Altamira...)"
-              style={styles.input}
-              value={zones} onChangeText={setZones} multiline
-            />
-            <TextInput
-              placeholder="Precio (ej. 5.00)"
-              style={styles.input}
-              value={price} onChangeText={setPrice} keyboardType="numeric"
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={closeModal} style={[styles.btn, styles.btnCancel]}>
-                <Text style={styles.btnText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleSave} style={[styles.btn, styles.btnSave]}>
-                <Text style={styles.btnText}>Guardar</Text>
-              </TouchableOpacity>
+    const renderItem = ({ item }) => (
+        <View style={styles.card}>
+            <View style={styles.cardInfo}>
+                <Text style={styles.cardTitle}>{item.name}</Text>
+                <Text style={styles.cardZones}>📍 {item.zones}</Text>
+                <Text style={styles.cardPrice}>💰 ${item.price}</Text>
             </View>
-          </View>
+            <View style={styles.cardActions}>
+                <TouchableOpacity onPress={() => openEdit(item)} style={styles.actionBtn}>
+                    <Text style={{ fontSize: 20 }}>✏️</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.actionBtn}>
+                    <Text style={{ fontSize: 20 }}>🗑️</Text>
+                </TouchableOpacity>
+            </View>
         </View>
-      </Modal>
+    );
 
-    </View>
-  );
+    return (
+        <View style={styles.container}>
+
+            <View style={styles.mapContainer}>
+                <MapView
+                    style={styles.map}
+                    initialRegion={mapRegion}
+                    showsUserLocation={false} 
+                    showsPointsOfInterest={false}
+                    scrollEnabled={true}
+                    zoomEnabled={true}
+                />
+            </View>
+
+            <View style={styles.listContainer}>
+                <View style={styles.listHeader}>
+                    <Text style={styles.headerTitle}>Rutas activas</Text>
+                    <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+                        <Text style={styles.addButtonText}>+ Nueva ruta</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <FlatList
+                    data={routes}
+                    keyExtractor={item => item.id}
+                    renderItem={renderItem}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                />
+            </View>
+
+            <Modal animationType="slide" transparent={true} visible={modalVisible}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{isEditing ? 'Editar ruta' : 'Crear nueva ruta'}</Text>
+
+                        <TextInput
+                            placeholder="Nombre (ej. Zona del Este)"
+                            style={styles.input}
+                            value={name} onChangeText={setName}
+                        />
+                        <TextInput
+                            placeholder="Zonas (ej. Chacao, Altamira...)"
+                            style={styles.input}
+                            value={zones} onChangeText={setZones} multiline
+                        />
+                        <TextInput
+                            placeholder="Precio (ej. 5.00)"
+                            style={styles.input}
+                            value={price} onChangeText={setPrice} keyboardType="numeric"
+                        />
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity onPress={closeModal} style={[styles.btn, styles.btnCancel]}>
+                                <Text style={styles.btnText}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleSave} style={[styles.btn, styles.btnSave]}>
+                                <Text style={styles.btnText}>Guardar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -161,16 +176,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center', 
         alignItems: 'center',
         borderBottomWidth: 1, 
-        borderBottomColor: '#ccc'
+        borderBottomColor: '#ccc',
+        overflow: 'hidden',
     },
-    mapText: { 
-        fontSize: 18, 
-        fontWeight: 'bold', 
-        color: '#555' 
-    },
-    mapSubtext: { 
-        fontSize: 12, 
-        color: '#777' 
+    map: {
+        width: '100%',
+        height: '100%',
     },
     listHeader: { 
         flexDirection: 'row', 
