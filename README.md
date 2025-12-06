@@ -56,9 +56,12 @@ No se requiere acción manual. La aplicación inicializará automáticamente la 
 ### Inicia la app
 Ejecuta npx expo start o escanea el código QR con tu app Expo Go
 
-
 ## Funcionalidades futuras
 - Generación de reportes en PDF/CSV para admins
 - Enviar notificaciones reales a riders inactivos (funcionalidad admin)
 - Filtros avanzados por zona, rider y estado (funcionalidad admin)
 - Aplicar cambio de tema a toda la app (tanto para rider como para admins)
+
+
+## Licencia
+Este proyecto está bajo la licencia MIT © 2025 Nicoralda.
