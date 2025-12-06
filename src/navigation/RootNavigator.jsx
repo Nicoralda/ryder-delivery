@@ -25,15 +25,12 @@ export default function RootNavigator() {
     useEffect(() => {
         const initializeApp = async () => {
             try {
-                // 1. Inicializar DB
                 await initDB();
                 
-                // 2. Buscar sesión guardada
                 const session = await getSession();
                 
                 if (session) {
                     console.log("Sesión recuperada de SQLite:", session);
-                    // Restaurar sesión en Redux
                     dispatch(loginSuccess(session));
                 }
             } catch (error) {

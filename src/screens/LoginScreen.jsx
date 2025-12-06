@@ -26,28 +26,23 @@ export default function LoginScreen({ navigation }) {
             setLoading(true);
             dispatch(loginStart());
 
-            // 1. Firebase Auth
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // 2. Firestore Data
             const docRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const userData = docSnap.data();
                 
-                // 3. Validar Rol
                 const selectedRoleFormatted = role === 'admin' ? 'Admin' : 'Ryder';
                 if (userData.role !== selectedRoleFormatted) {
                     await signOut(auth);
                     throw new Error(`Esta cuenta no es de ${selectedRoleFormatted}.`);
                 }
 
-                // 4. Guardar en SQLite (Persistencia Local)
                 await saveSession(user.uid, userData.email, userData.fullName, userData.role);
 
-                // 5. Guardar en Redux
                 dispatch(loginSuccess({
                     uid: user.uid,
                     email: userData.email,
@@ -87,7 +82,7 @@ export default function LoginScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <TextInput style={styles.input} placeholder="Correo Electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#777"/>
+                <TextInput style={styles.input} placeholder="Correo electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#777"/>
                 <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor="#777"/>
 
                 <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8} disabled={loading}>
@@ -103,17 +98,77 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scrollContainer: { flexGrow: 1, justifyContent: 'center', backgroundColor: '#fff' },
-    container: { padding: 24, paddingTop: 80, paddingBottom: 40 },
-    title: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 10, color: '#333' },
-    subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 30, color: '#555' },
-    tabs: { flexDirection: 'row', justifyContent: 'center', marginBottom: 20 },
-    tab: { padding: 10, marginHorizontal: 10, borderBottomWidth: 2, borderBottomColor: 'transparent' },
-    activeTab: { borderBottomColor: '#00A89C' },
-    tabText: { fontSize: 16, color: '#777' },
-    activeText: { fontWeight: 'bold', color: '#333' },
-    input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 15, fontSize: 16, color: '#333' },
-    loginButton: { backgroundColor: '#FF7F00', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 10 },
-    loginText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
-    registerText: { textAlign: 'center', marginTop: 20, color: '#00A89C', fontSize: 14 }
+    
+    scrollContainer: { 
+        flexGrow: 1, 
+        justifyContent: 'center', 
+        backgroundColor: '#fff' 
+    },
+    container: { 
+        padding: 24, 
+        paddingTop: 80, 
+        paddingBottom: 40 
+    },
+    title: { 
+        fontSize: 32, 
+        fontWeight: 'bold', 
+        textAlign: 'center', 
+        marginBottom: 10, 
+        color: '#333' 
+    },
+    subtitle: { 
+        fontSize: 16, 
+        textAlign: 'center', 
+        marginBottom: 30, 
+        color: '#555' 
+    },
+    loginText: { 
+        color: '#fff', 
+        fontWeight: 'bold', 
+        fontSize: 18 
+    },
+    registerText: { 
+        textAlign: 'center', 
+        marginTop: 20, 
+        color: '#00A89C', 
+        fontSize: 14 
+    },
+    tabs: { 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        marginBottom: 20 
+    },
+    tab: { 
+        padding: 10, 
+        marginHorizontal: 10, 
+        borderBottomWidth: 2, 
+        borderBottomColor: 'transparent' 
+    },
+    activeTab: { 
+        borderBottomColor: '#00A89C' 
+    },
+    tabText: { 
+        fontSize: 16, 
+        color: '#777' 
+    },
+    activeText: { 
+        fontWeight: 'bold', 
+        color: '#333' 
+    },
+    input: { 
+        borderWidth: 1, 
+        borderColor: '#ccc', 
+        borderRadius: 8, 
+        padding: 12, 
+        marginBottom: 15, 
+        fontSize: 16, 
+        color: '#333' 
+    },
+    loginButton: { 
+        backgroundColor: '#FF7F00', 
+        padding: 14, 
+        borderRadius: 8, 
+        alignItems: 'center', 
+        marginTop: 10 
+    },
 });

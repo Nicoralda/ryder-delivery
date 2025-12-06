@@ -65,7 +65,7 @@ export default function RyderMapScreen() {
                 <Ionicons name="warning" size={30} color="#d9534f" />
                 <Text style={styles.errorText}>{errorMsg}</Text>
                 <TouchableOpacity style={styles.retryButton} onPress={getLocationAsync}>
-                    <Text style={styles.retryText}>Reintentar / Pedir Permiso</Text>
+                    <Text style={styles.retryText}>Reintentar / Pedir permiso</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -77,7 +77,6 @@ export default function RyderMapScreen() {
             </View>
         );
     } else {
-        // Mapa con la ubicación real
         content = (
             <>
                 <Text style={styles.infoText}>
@@ -97,7 +96,6 @@ export default function RyderMapScreen() {
                             pinColor="#FF7F00"
                         />
                         
-                        {/* Marcador de destino (simulando) */}
                         {currentRoute && (
                             <Marker
                                 coordinate={{ latitude: location.latitude + 0.005, longitude: location.longitude + 0.002 }}
@@ -114,9 +112,9 @@ export default function RyderMapScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.screenTitle}>Mapa de Rutas</Text>
+            <Text style={styles.screenTitle}>Mapa de rutas</Text>
             <View style={styles.card}>
-                <Text style={styles.cardTitle}>Ruta Activa</Text>
+                <Text style={styles.cardTitle}>Ruta activa</Text>
                 <Text style={styles.routeDetails}>
                     {currentRoute ? `Ruta: #${currentRoute.orderNumber} a ${currentRoute.location}` : 'No tienes rutas activas. Inicia una entrega'}
                 </Text>

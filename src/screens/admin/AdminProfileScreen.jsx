@@ -21,7 +21,6 @@ export default function AdminProfileScreen() {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     
-    // Obtener los datos del usuario logueado desde Redux
     const user = useSelector(state => state.auth.user) || {
         fullName: 'Administrador',
         email: 'admin@app.com',
@@ -31,7 +30,6 @@ export default function AdminProfileScreen() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const toggleSwitch = () => setIsDarkMode(previousState => !previousState);
 
-    // Lógica de Cerrar Sesión con Firebase y SQLite
     const handleLogout = () => {
         Alert.alert(
             "Cerrar sesión",
@@ -43,9 +41,9 @@ export default function AdminProfileScreen() {
                     onPress: async () => {
                         setLoading(true);
                         try {
-                            await clearSession(); // 1. Limpiar SQLite (Persistencia local)
-                            await signOut(auth);  // 2. Cerrar sesión en Firebase Auth
-                            dispatch(logout());   // 3. Limpiar Redux (Navegación)
+                            await clearSession();
+                            await signOut(auth);
+                            dispatch(logout());
                         } catch (error) {
                             console.error("Error al cerrar sesión:", error);
                             Alert.alert("Error", "No se pudo cerrar la sesión correctamente");
@@ -65,7 +63,6 @@ export default function AdminProfileScreen() {
                 
                 <Text style={styles.header}>👤 Mi perfil de Administrador</Text>
                 
-                {/* SECCIÓN DE INFORMACIÓN PERSONAL */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Detalles de la cuenta</Text>
                     
@@ -98,7 +95,6 @@ export default function AdminProfileScreen() {
                     </View>
                 </View>
 
-                {/* SECCIÓN DE CONFIGURACIÓN DE TEMA */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Configuración de la app</Text>
                     
@@ -120,7 +116,6 @@ export default function AdminProfileScreen() {
                     </View>
                 </View>
 
-                {/* BOTÓN CERRAR SESIÓN */}
                 <TouchableOpacity 
                     style={styles.logoutButton} 
                     onPress={handleLogout}
@@ -142,9 +137,26 @@ export default function AdminProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    scrollContent: { padding: 15, paddingBottom: 50 },
-    header: { fontSize: 24, fontWeight: 'bold', color: COLORS.text, marginBottom: 25, textAlign: 'center' },
+    container: { 
+        flex: 1, 
+        backgroundColor: COLORS.background 
+    },
+    scrollContent: { 
+        padding: 15, 
+        paddingBottom: 50 
+    },
+    header: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        color: COLORS.text, 
+        marginBottom: 25, 
+        textAlign: 'center' 
+    },
+    separator: { 
+        height: 1, 
+        backgroundColor: '#f0f0f0', 
+        marginVertical: 5 
+    },
     card: { 
         backgroundColor: COLORS.card, 
         borderRadius: 10, 
@@ -165,21 +177,45 @@ const styles = StyleSheet.create({
         borderBottomColor: '#eee', 
         paddingBottom: 8 
     },
-    infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-    icon: { marginRight: 15 },
-    infoTextContainer: { flex: 1 },
-    label: { fontSize: 13, color: COLORS.subText },
-    value: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginTop: 2 },
-    roleValue: { color: COLORS.primary, fontWeight: 'bold' },
-    separator: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 5 },
+    infoRow: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        paddingVertical: 10 
+    },
+    icon: { 
+        marginRight: 15 
+    },
+    infoTextContainer: { 
+        flex: 1 
+    },
+    label: { 
+        fontSize: 13, 
+        color: COLORS.subText 
+    },
+    value: { 
+        fontSize: 16, 
+        fontWeight: '600', 
+        color: COLORS.text, 
+        marginTop: 2 
+    },
+    roleValue: { 
+        color: COLORS.primary, 
+        fontWeight: 'bold' 
+    },
     themeRow: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
         alignItems: 'center',
         paddingVertical: 5,
     },
-    themeInfo: { flexDirection: 'row', alignItems: 'center' },
-    themeSwitcher: { flexDirection: 'row', alignItems: 'center' },
+    themeInfo: { 
+        flexDirection: 'row', 
+        alignItems: 'center' 
+    },
+    themeSwitcher: { 
+        flexDirection: 'row', 
+        alignItems: 'center' 
+    },
     logoutButton: {
         flexDirection: 'row',
         backgroundColor: COLORS.danger,

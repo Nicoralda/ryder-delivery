@@ -1,11 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import moment from 'moment';
 
-// Para simular tiempos en los datos de prueba
 const createOrder = (id, status, daysAgo, cost, riderId, durationInMinutes = 0) => {
     const createdAt = moment().subtract(daysAgo, 'days');
     
-// Simulación de tiempos
     let pickupTime = null;
     let deliveredTime = null;
 
@@ -39,15 +37,10 @@ const createOrder = (id, status, daysAgo, cost, riderId, durationInMinutes = 0) 
 const initialState = {
     lastOrderNumber: 20, 
     list: [
-    // Semana actual
-    // Orden completada (tardó 45 min)
         createOrder(20, 'Completada', 0, '3.50', 'R001', 45), 
-    // Orden completada (tardó 30 min)
         createOrder(19, 'Completada', 1, '3.50', 'R001', 30),
-    // Orden asignada (aún no iniciada por el rider)
         createOrder(18, 'Asignada', 0, '2.00', 'R001', 0),
         
-    // Semanas anteriores
         createOrder(17, 'Completada', 8, '5.00', 'R001', 60),
         createOrder(16, 'Completada', 9, '2.50', 'R002', 25),
     ],

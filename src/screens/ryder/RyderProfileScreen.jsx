@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/AuthSlice';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../firebase/config';
 import { clearSession } from '../../database/db';
 
 const COLORS = {
-    primary: '#FF7F00', 
-    secondary: '#00A89C', 
+    primary: '#FF7F00',
+    secondary: '#00A89C',
     danger: '#d9534f',
     background: '#f5f5f5',
     card: '#ffffff',
@@ -21,33 +21,31 @@ const COLORS = {
 export default function RyderProfileScreen() {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
-    
-    // Obtener los datos del usuario logueado desde Redux
+
     const user = useSelector(state => state.auth.user) || {
         fullName: 'Fernando Ryder',
         email: 'fernando.ryder@app.com',
         role: 'Ryder',
     };
     const { fullName, email } = user;
-    
+
     const [isAvailable, setIsAvailable] = useState(true);
     const toggleAvailability = () => setIsAvailable(previousState => !previousState);
 
-    // Lógica de Cerrar Sesión con Firebase y SQLite
     const handleLogout = () => {
         Alert.alert(
             "Cerrar sesión",
             "¿Estás seguro de que deseas cerrar tu sesión?",
             [
                 { text: "Cancelar", style: "cancel" },
-                { 
-                    text: "Sí, cerrar sesión", 
+                {
+                    text: "Sí, cerrar sesión",
                     onPress: async () => {
                         setLoading(true);
                         try {
-                            await clearSession(); // 1. Limpiar SQLite (Persistencia local)
-                            await signOut(auth);  // 2. Cerrar sesión en Firebase Auth
-                            dispatch(logout());   // 3. Limpiar Redux (Navegación)
+                            await clearSession();
+                            await signOut(auth);
+                            dispatch(logout());
                         } catch (error) {
                             console.error("Error al cerrar sesión:", error);
                             Alert.alert("Error", "No se pudo cerrar la sesión correctamente");
@@ -64,13 +62,12 @@ export default function RyderProfileScreen() {
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                
+
                 <Text style={styles.header}>🛵 Mi perfil de Ryder</Text>
-                
-                {/* SECCIÓN DE INFORMACIÓN PERSONAL */}
+
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Detalles de la cuenta</Text>
-                    
+
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="account" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -78,7 +75,7 @@ export default function RyderProfileScreen() {
                             <Text style={styles.value}>{fullName}</Text>
                         </View>
                     </View>
-                    
+
                     <View style={styles.separator} />
 
                     <View style={styles.infoRow}>
@@ -88,7 +85,7 @@ export default function RyderProfileScreen() {
                             <Text style={styles.value}>{email}</Text>
                         </View>
                     </View>
-                    
+
                     <View style={styles.separator} />
 
                     <View style={styles.infoRow}>
@@ -100,17 +97,16 @@ export default function RyderProfileScreen() {
                     </View>
                 </View>
 
-                {/* SECCIÓN DE DISPONIBILIDAD */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Estado de servicio</Text>
-                    
+
                     <View style={styles.themeRow}>
                         <View style={styles.themeInfo}>
-                            <MaterialCommunityIcons 
-                                name={isAvailable ? "checkbox-marked-circle" : "close-circle"} 
-                                size={22} 
-                                color={isAvailable ? COLORS.secondary : COLORS.danger} 
-                                style={{ marginRight: 10 }} 
+                            <MaterialCommunityIcons
+                                name={isAvailable ? "checkbox-marked-circle" : "close-circle"}
+                                size={22}
+                                color={isAvailable ? COLORS.secondary : COLORS.danger}
+                                style={{ marginRight: 10 }}
                             />
                             <Text style={styles.label}>Disponibilidad</Text>
                         </View>
@@ -129,9 +125,8 @@ export default function RyderProfileScreen() {
                     </View>
                 </View>
 
-                {/* BOTÓN CERRAR SESIÓN */}
-                <TouchableOpacity 
-                    style={styles.logoutButton} 
+                <TouchableOpacity
+                    style={styles.logoutButton}
                     onPress={handleLogout}
                     disabled={loading}
                 >
@@ -154,36 +149,36 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.background },
     scrollContent: { padding: 15, paddingBottom: 50 },
     header: { fontSize: 24, fontWeight: 'bold', color: COLORS.text, marginBottom: 25, textAlign: 'center' },
-    card: { 
-        backgroundColor: COLORS.card, 
-        borderRadius: 10, 
-        padding: 15, 
-        marginBottom: 20, 
+    card: {
+        backgroundColor: COLORS.card,
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 20,
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
     },
-    cardTitle: { 
-        fontSize: 18, 
-        fontWeight: 'bold', 
-        color: COLORS.primary, 
-        marginBottom: 15, 
-        borderBottomWidth: 1, 
-        borderBottomColor: '#eee', 
-        paddingBottom: 8 
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: COLORS.primary,
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        paddingBottom: 8
     },
     infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
     icon: { marginRight: 15 },
     infoTextContainer: { flex: 1 },
     label: { fontSize: 13, color: COLORS.subText },
     value: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginTop: 2 },
-    roleValue: { color: COLORS.primary, fontWeight: 'bold' }, 
+    roleValue: { color: COLORS.primary, fontWeight: 'bold' },
     separator: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 5 },
-    themeRow: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
+    themeRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 5,
     },

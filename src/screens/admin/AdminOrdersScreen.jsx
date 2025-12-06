@@ -204,7 +204,6 @@ export default function AdminOrdersScreen() {
         )}
       />
 
-      {/* MODAL CREAR ORDEN */}
       <Modal animationType="slide" transparent={true} visible={orderModalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -285,7 +284,6 @@ export default function AdminOrdersScreen() {
         </View>
       </Modal>
 
-      {/* MODAL ASIGNACIÓN */}
       <Modal animationType="fade" transparent={true} visible={assignmentModalVisible}>
         <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -335,57 +333,217 @@ export default function AdminOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f5f5f5' 
+    },
+    emptyText: { 
+        textAlign: 'center', 
+        marginTop: 50, 
+        color: '#888' 
+    },
     floatingButton: {
-        position: 'absolute', bottom: 20, right: 20,
-        backgroundColor: '#00A89C', paddingVertical: 15, paddingHorizontal: 20,
-        borderRadius: 30, elevation: 5, zIndex: 10,
+        position: 'absolute', 
+        bottom: 20, 
+        right: 20,
+        backgroundColor: '#00A89C', 
+        paddingVertical: 15, 
+        paddingHorizontal: 20,
+        borderRadius: 30, 
+        elevation: 5, 
+        zIndex: 10,
     },
-    floatingButtonText: { color: 'white', fontWeight: 'bold', fontSize: 18 },
-
+    floatingButtonText: { 
+        color: 'white', 
+        fontWeight: 'bold', 
+        fontSize: 18 
+    },
     card: {
-        backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10,
-        flexDirection: 'row', justifyContent: 'space-between', elevation: 2,
+        backgroundColor: 'white', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginBottom: 10,
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        elevation: 2,
     },
-    cardInfo: { flex: 1, marginRight: 10 },
-    orderNumber: { fontSize: 18, fontWeight: 'bold', color: '#00A89C' },
-    cardTitle: { fontSize: 16, fontWeight: 'bold', marginTop: 5 },
-    cardDetail: { fontSize: 14, color: '#555' },
-    cardPrice: { fontSize: 15, fontWeight: 'bold', color: '#00A89C', marginTop: 5 }, 
-    
-    status: { fontWeight: 'bold', marginTop: 5, paddingVertical: 2, paddingHorizontal: 5, borderRadius: 5, textAlign: 'center' },
-    assigned: { backgroundColor: '#e6ffe6', color: '#00a800' },
-    pending: { backgroundColor: '#ffffee', color: '#cc9900' },
-    cancelled: { backgroundColor: '#ffcccc', color: '#cc0000' }, 
-    defaultStatus: { backgroundColor: '#ddd', color: '#333' },
-
-    riderName: { fontSize: 14, color: '#333', marginTop: 5 },
-    cardActions: { justifyContent: 'center', minWidth: 80 },
-    actionBtnAssign: { backgroundColor: '#00A89C', padding: 8, borderRadius: 5, marginTop: 5 },
-    actionBtnCancel: { backgroundColor: '#FF7F00', padding: 8, borderRadius: 5, marginTop: 5 },
-    actionBtnDelete: { backgroundColor: '#d9534f', padding: 8, borderRadius: 5, marginTop: 5 }, 
-    actionBtnText: { color: 'white', textAlign: 'center', fontSize: 14 },
-    emptyText: { textAlign: 'center', marginTop: 50, color: '#888' },
-
-    modalOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 20 },
-    modalContent: { backgroundColor: 'white', borderRadius: 15, padding: 20, maxHeight: '90%' },
-    modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, textAlign: 'center', color: '#333' },
-    scrollContent: { paddingBottom: 20 },
-    input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, marginBottom: 15, fontSize: 16 },
-    label: { fontSize: 14, color: '#555', marginBottom: 5, fontWeight: 'bold' },
-    pickerContainer: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginBottom: 15 },
-    picker: { height: 50, width: '100%' },
-    priceDisplay: { fontSize: 18, fontWeight: 'bold', color: '#FF7F00', marginVertical: 10 }, 
-
-    modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 },
-    btn: { flex: 1, padding: 12, borderRadius: 8, marginHorizontal: 5, alignItems: 'center' },
-    btnCancel: { backgroundColor: '#999' },
-    btnSave: { backgroundColor: '#FF7F00' },
-    btnText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-    
-    inactiveRiderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: '#eee' },
-    inactiveRiderText: { color: '#d9534f', fontSize: 15, fontWeight: 'bold' },
-    requestActivationButton: { backgroundColor: '#00A89C', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 },
-    requestActivationText: { color: 'white', fontSize: 12 },
+    cardInfo: { 
+        flex: 1, 
+        marginRight: 10 
+    },
+    orderNumber: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        color: '#00A89C' 
+    },
+    cardTitle: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        marginTop: 5 
+    },
+    cardDetail: { 
+        fontSize: 14, 
+        color: '#555' 
+    },
+    cardPrice: { 
+        fontSize: 15, 
+        fontWeight: 'bold', 
+        color: '#00A89C', 
+        marginTop: 5 
+    }, 
+    riderName: { 
+        fontSize: 14, 
+        color: '#333', 
+        marginTop: 5 
+    },
+    status: { 
+        fontWeight: 'bold', 
+        marginTop: 5, 
+        paddingVertical: 2, 
+        paddingHorizontal: 5, 
+        borderRadius: 5, 
+        textAlign: 'center' 
+    },
+    assigned: { 
+        backgroundColor: '#e6ffe6', 
+        color: '#00a800' 
+    },
+    pending: { 
+        backgroundColor: '#ffffee', 
+        color: '#cc9900' 
+    },
+    cancelled: { 
+        backgroundColor: '#ffcccc', 
+        color: '#cc0000' 
+    }, 
+    defaultStatus: { 
+        backgroundColor: '#ddd', 
+        color: '#333' 
+    },
+    cardActions: { 
+        justifyContent: 'center', 
+        minWidth: 80 
+    },
+    actionBtnAssign: { 
+        backgroundColor: '#00A89C', 
+        padding: 8, 
+        borderRadius: 5, 
+        marginTop: 5 
+    },
+    actionBtnCancel: { 
+        backgroundColor: '#FF7F00', 
+        padding: 8, 
+        borderRadius: 5, 
+        marginTop: 5 
+    },
+    actionBtnDelete: { 
+        backgroundColor: '#d9534f', 
+        padding: 8, 
+        borderRadius: 5, 
+        marginTop: 5 
+    }, 
+    actionBtnText: { 
+        color: 'white', 
+        textAlign: 'center', 
+        fontSize: 14 
+    },
+    modalOverlay: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        backgroundColor: 'rgba(0,0,0,0.5)', 
+        padding: 20 
+    },
+    modalContent: { 
+        backgroundColor: 'white', 
+        borderRadius: 15, 
+        padding: 20, 
+        maxHeight: '90%' 
+    },
+    modalTitle: { 
+        fontSize: 22, 
+        fontWeight: 'bold', 
+        marginBottom: 15, 
+        textAlign: 'center', 
+        color: '#333' 
+    },
+    scrollContent: { 
+        paddingBottom: 20 
+    },
+    label: { 
+        fontSize: 14, 
+        color: '#555', 
+        marginBottom: 5, 
+        fontWeight: 'bold' 
+    },
+    input: { 
+        borderWidth: 1, 
+        borderColor: '#ddd', 
+        borderRadius: 8, 
+        padding: 10, 
+        marginBottom: 15, 
+        fontSize: 16 
+    },
+    pickerContainer: { 
+        borderWidth: 1, 
+        borderColor: '#ddd', 
+        borderRadius: 8, 
+        marginBottom: 15 
+    },
+    picker: { 
+        height: 50, 
+        width: '100%' 
+    },
+    priceDisplay: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        color: '#FF7F00', 
+        marginVertical: 10 
+    }, 
+    modalButtons: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        marginTop: 15 
+    },
+    btn: { 
+        flex: 1, 
+        padding: 12, 
+        borderRadius: 8, 
+        marginHorizontal: 5, 
+        alignItems: 'center' 
+    },
+    btnCancel: { 
+        backgroundColor: '#999' 
+    },
+    btnSave: { 
+        backgroundColor: '#FF7F00' 
+    },
+    btnText: { 
+        color: 'white', 
+        fontWeight: 'bold', 
+        fontSize: 16 
+    },
+    inactiveRiderRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 10, 
+        paddingVertical: 5, 
+        borderBottomWidth: 1, 
+        borderBottomColor: '#eee' 
+    },
+    inactiveRiderText: { 
+        color: '#d9534f', 
+        fontSize: 15, 
+        fontWeight: 'bold' 
+    },
+    requestActivationButton: { 
+        backgroundColor: '#00A89C', 
+        paddingVertical: 5, 
+        paddingHorizontal: 10, 
+        borderRadius: 5 
+    },
+    requestActivationText: { 
+        color: 'white', 
+        fontSize: 12 
+    },
 });

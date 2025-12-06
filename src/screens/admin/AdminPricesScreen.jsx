@@ -89,7 +89,7 @@ export default function AdminPricesScreen() {
 
       {/* 1. SECCIÓN DEL MAPA (simulada) */}
       <View style={styles.mapContainer}>
-        <Text style={styles.mapText}>🗺️ Mapa de Rutas de Caracas</Text>
+        <Text style={styles.mapText}>🗺️ Mapa de rutas de Caracas</Text>
         <Text style={styles.mapSubtext}>(Integración de Google Maps aquí)</Text>
       </View>
 
@@ -147,38 +147,136 @@ export default function AdminPricesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  mapContainer: {
-    height: 200, backgroundColor: '#e1e1e1', justifyContent: 'center', alignItems: 'center',
-    borderBottomWidth: 1, borderBottomColor: '#ccc'
-  },
-  mapText: { fontSize: 18, fontWeight: 'bold', color: '#555' },
-  mapSubtext: { fontSize: 12, color: '#777' },
-
-  listContainer: { flex: 1, padding: 15 },
-  listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#333' },
-  addButton: { backgroundColor: '#00A89C', padding: 10, borderRadius: 8 },
-  addButtonText: { color: 'white', fontWeight: 'bold' },
-
-  card: {
-    backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10, flexDirection: 'row',
-    justifyContent: 'space-between', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1,
-  },
-  cardInfo: { flex: 1, marginRight: 10 },
-  cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#00A89C' },
-  cardZones: { fontSize: 14, color: '#555', marginTop: 5 },
-  cardPrice: { fontSize: 16, fontWeight: 'bold', color: '#FF7F00', marginTop: 5 },
-  cardActions: { justifyContent: 'center' },
-  actionBtn: { padding: 5, marginBottom: 5 },
-
-  modalOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', padding: 20 },
-  modalContent: { backgroundColor: 'white', borderRadius: 15, padding: 20 },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, textAlign: 'center', color: '#333' },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, marginBottom: 15, fontSize: 16 },
-  modalButtons: { flexDirection: 'row', justifyContent: 'space-between' },
-  btn: { flex: 1, padding: 12, borderRadius: 8, marginHorizontal: 5, alignItems: 'center' },
-  btnCancel: { backgroundColor: '#999' },
-  btnSave: { backgroundColor: '#00A89C' },
-  btnText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f5f5f5' 
+    },
+    listContainer: { 
+        flex: 1, 
+        padding: 15 
+    },
+    mapContainer: {
+        height: 200, 
+        backgroundColor: '#e1e1e1', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        borderBottomWidth: 1, 
+        borderBottomColor: '#ccc'
+    },
+    mapText: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        color: '#555' 
+    },
+    mapSubtext: { 
+        fontSize: 12, 
+        color: '#777' 
+    },
+    listHeader: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: 15 
+    },
+    headerTitle: { 
+        fontSize: 20, 
+        fontWeight: 'bold', 
+        color: '#333' 
+    },
+    addButton: { 
+        backgroundColor: '#00A89C', 
+        padding: 10, 
+        borderRadius: 8 
+    },
+    addButtonText: { 
+        color: 'white', 
+        fontWeight: 'bold' 
+    },
+    card: {
+        backgroundColor: 'white', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginBottom: 10, 
+        flexDirection: 'row',
+        justifyContent: 'space-between', 
+        elevation: 3, 
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 2 }, 
+        shadowOpacity: 0.1,
+    },
+    cardInfo: { 
+        flex: 1, 
+        marginRight: 10 
+    },
+    cardTitle: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        color: '#00A89C' 
+    },
+    cardZones: { 
+        fontSize: 14, 
+        color: '#555', 
+        marginTop: 5 
+    },
+    cardPrice: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        color: '#FF7F00', 
+        marginTop: 5 
+    },
+    cardActions: { 
+        justifyContent: 'center' 
+    },
+    actionBtn: { 
+        padding: 5, 
+        marginBottom: 5 
+    },
+    modalOverlay: { 
+        flex: 1, 
+        justifyContent: 'center', 
+        backgroundColor: 'rgba(0,0,0,0.5)', 
+        padding: 20 
+    },
+    modalContent: { 
+        backgroundColor: 'white', 
+        borderRadius: 15, 
+        padding: 20 
+    },
+    modalTitle: { 
+        fontSize: 22, 
+        fontWeight: 'bold', 
+        marginBottom: 15, 
+        textAlign: 'center', 
+        color: '#333' 
+    },
+    input: { 
+        borderWidth: 1, 
+        borderColor: '#ddd', 
+        borderRadius: 8, 
+        padding: 10, 
+        marginBottom: 15, 
+        fontSize: 16 
+    },
+    modalButtons: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between' 
+    },
+    btn: { 
+        flex: 1, 
+        padding: 12, 
+        borderRadius: 8, 
+        marginHorizontal: 5, 
+        alignItems: 'center' 
+    },
+    btnCancel: { 
+        backgroundColor: '#999' 
+    },
+    btnSave: { 
+        backgroundColor: '#00A89C' 
+    },
+    btnText: { 
+        color: 'white', 
+        fontWeight: 'bold', 
+        fontSize: 16 
+    },
 });

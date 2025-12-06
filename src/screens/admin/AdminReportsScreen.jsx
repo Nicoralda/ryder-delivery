@@ -94,7 +94,6 @@ export default function AdminReportsScreen() {
     };
 
     const averageDeliveryTime = useMemo(() => calculateDeliveryAverage(), [allOrders, startDate, endDate]);
-    //------------------------------------------------------------;)
 
     const weeklyReport = useMemo(() => {
         return getWeeklyReport(allOrders, startDate, endDate);
@@ -109,13 +108,13 @@ export default function AdminReportsScreen() {
         if (selectedDate) {
             if (type === 'start') {
                 if (moment(selectedDate).isAfter(endDate)) {
-                    Alert.alert('Error', 'La fecha de inicio no puede ser posterior a la fecha final.');
+                    Alert.alert('Error', 'La fecha de inicio no puede ser posterior a la fecha final');
                 } else {
                     setStartDate(selectedDate);
                 }
             } else {
                 if (moment(selectedDate).isBefore(startDate)) {
-                    Alert.alert('Error', 'La fecha final no puede ser anterior a la fecha de inicio.');
+                    Alert.alert('Error', 'La fecha final no puede ser anterior a la fecha de inicio');
                 } else {
                     setEndDate(selectedDate);
                 }
@@ -133,7 +132,6 @@ export default function AdminReportsScreen() {
                 
                 <Text style={styles.header}>Resumen de reportes</Text>
                 
-                {/* SECCIÓN DE FILTROS */}
                 <View style={styles.filterSection}>
                     <Text style={styles.sectionTitle}>Filtro de rango de fechas</Text>
                     
@@ -175,7 +173,6 @@ export default function AdminReportsScreen() {
 
                 <View style={styles.separator} />
                 
-                {/* KPIs GLOBALES */}
                 <Text style={styles.sectionTitle}>Indicadores clave del período</Text>
                 <View style={styles.kpiContainer}>
                     <View style={styles.kpiCard}>
@@ -193,19 +190,16 @@ export default function AdminReportsScreen() {
                         <Text style={styles.kpiLabel}>Ingreso delivery (Est.)</Text>
                     </View>
                     
-                    {/* 🚀 TARJETA DE PROMEDIO DE TIEMPO DE ENTREGA (ACTUALIZADA) */}
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiValueAverage}>{averageDeliveryTime}</Text>
                         <Text style={styles.kpiLabel}>Promedio tiempo de entrega</Text>
                         <Text style={styles.kpiSubLabel}>(Recolección ➔ Entrega)</Text>
                     </View>
-                    {/* FIN DE TARJETA ACTUALIZADA */}
 
                 </View>
 
                 <View style={styles.separator} />
                 
-                {/* REPORTE SEMANAL */}
                 <Text style={styles.sectionTitle}>Resumen de órdenes semanal</Text>
                 
                 {weeklyReport.length === 0 ? (
@@ -215,7 +209,7 @@ export default function AdminReportsScreen() {
                         <View key={index} style={styles.weekCard}>
                             <Text style={styles.weekTitle}>{week.weekLabel}</Text>
                             <View style={styles.weekDetailRow}>
-                                <Text style={styles.weekDetailLabel}>Total de Órdenes:</Text>
+                                <Text style={styles.weekDetailLabel}>Total de órdenes:</Text>
                                 <Text style={styles.weekDetailValueTotal}>{week.totalOrders}</Text>
                             </View>
                             <View style={styles.weekDetailRow}>
@@ -231,7 +225,7 @@ export default function AdminReportsScreen() {
                                 <Text style={styles.weekDetailValuePending}>{week.pendingOrders}</Text>
                             </View>
                             <View style={styles.weekDetailRow}>
-                                <Text style={styles.weekDetailLabel}>Ingreso Estimado:</Text>
+                                <Text style={styles.weekDetailLabel}>Ingreso estimado:</Text>
                                 <Text style={styles.weekDetailValueRevenue}>${week.totalRevenue.toFixed(2)}</Text>
                             </View>
                         </View>
@@ -242,7 +236,7 @@ export default function AdminReportsScreen() {
 
             {/* BOTÓN DE DESCARGA (FUTURO) */}
             <TouchableOpacity style={styles.downloadButton} disabled={true}>
-                <Text style={styles.downloadButtonText}>Descargar Reporte (Futuro)</Text>
+                <Text style={styles.downloadButtonText}>Descargar reporte (Futuro)</Text>
             </TouchableOpacity>
 
         </View>
@@ -250,60 +244,193 @@ export default function AdminReportsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    scrollContent: { padding: 15, paddingBottom: 100 },
-    header: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 15, textAlign: 'center' },
-    separator: { height: 1, backgroundColor: '#ddd', marginVertical: 20 },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#00A89C', marginBottom: 10 },
-    emptyText: { textAlign: 'center', color: '#888', marginTop: 20 },
-
-    filterSection: { padding: 10, backgroundColor: 'white', borderRadius: 10, elevation: 1 },
-    datePickerRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    dateInputContainer: { flex: 1, marginHorizontal: 5 },
-    label: { fontSize: 14, color: '#555', marginBottom: 5, fontWeight: 'bold' },
+    container: { 
+        flex: 1, 
+        backgroundColor: '#f5f5f5' 
+    },
+    scrollContent: { 
+        padding: 15, 
+        paddingBottom: 100 
+    },
+    separator: { 
+        height: 1, 
+        backgroundColor: '#ddd', 
+        marginVertical: 20 
+    },
+    emptyText: { 
+        textAlign: 'center', 
+        color: '#888', 
+        marginTop: 20 
+    },
+    header: { 
+        fontSize: 24, 
+        fontWeight: 'bold', 
+        color: '#333', 
+        marginBottom: 15, 
+        textAlign: 'center' 
+    },
+    sectionTitle: { 
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        color: '#00A89C', 
+        marginBottom: 10 
+    },
+    filterSection: { 
+        padding: 10, 
+        backgroundColor: 'white', 
+        borderRadius: 10, 
+        elevation: 1 
+    },
+    datePickerRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between' 
+    },
+    dateInputContainer: { 
+        flex: 1, 
+        marginHorizontal: 5 
+    },
+    label: { 
+        fontSize: 14, 
+        color: '#555', 
+        marginBottom: 5, 
+        fontWeight: 'bold' 
+    },
     dateInput: {
-        borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10,
-        backgroundColor: '#fff', alignItems: 'center',
+        borderWidth: 1, 
+        borderColor: '#ddd', 
+        borderRadius: 8, 
+        padding: 10,
+        backgroundColor: '#fff', 
+        alignItems: 'center',
     },
-
-    kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+    kpiContainer: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        marginBottom: 15 
+    },
     kpiCard: {
-        flex: 1, backgroundColor: '#fff', padding: 15, borderRadius: 10, marginHorizontal: 5,
-        alignItems: 'center', elevation: 2,
+        flex: 1, 
+        backgroundColor: '#fff', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginHorizontal: 5,
+        alignItems: 'center', 
+        elevation: 2,
     },
-    kpiValue: { fontSize: 32, fontWeight: 'bold', color: '#FF7F00' },
-    kpiValueRevenue: { fontSize: 32, fontWeight: 'bold', color: '#00A89C' },
-    kpiLabel: { fontSize: 14, color: '#555', marginTop: 5, textAlign: 'center' },
-    
-    kpiValueAverage: { fontSize: 28, fontWeight: 'bold', color: '#333' }, 
-    kpiSubLabel: { fontSize: 10, color: '#999', marginTop: 2 },
-
+    kpiValue: { 
+        fontSize: 32, 
+        fontWeight: 'bold', 
+        color: '#FF7F00' 
+    },
+    kpiValueRevenue: { 
+        fontSize: 32, 
+        fontWeight: 'bold', 
+        color: '#00A89C' 
+    },
+    kpiLabel: { 
+        fontSize: 14, 
+        color: '#555', 
+        marginTop: 5, 
+        textAlign: 'center' 
+    },
+    kpiValueAverage: { 
+        fontSize: 28, 
+        fontWeight: 'bold', 
+        color: '#333' 
+    }, 
+    kpiSubLabel: { 
+        fontSize: 10, 
+        color: '#999', 
+        marginTop: 2 
+    },
     kpiCardPlaceholder: {
-        flex: 1, backgroundColor: '#eee', padding: 15, borderRadius: 10, marginHorizontal: 5,
-        alignItems: 'center', justifyContent: 'center', elevation: 2,
+        flex: 1, 
+        backgroundColor: '#eee', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginHorizontal: 5,
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        elevation: 2,
     },
-    kpiPlaceholderText: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 5 },
-    kpiPlaceholderValue: { fontSize: 28, fontWeight: 'bold', color: '#888' },
-    kpiPlaceholderSubtext: { fontSize: 12, color: '#888', marginTop: 3 },
-
-    // Reporte semanal
+    kpiPlaceholderText: { 
+        fontSize: 14, 
+        color: '#888', 
+        textAlign: 'center', 
+        marginBottom: 5 
+    },
+    kpiPlaceholderValue: { 
+        fontSize: 28, 
+        fontWeight: 'bold', 
+        color: '#888' 
+    },
+    kpiPlaceholderSubtext: { 
+        fontSize: 12, 
+        color: '#888', 
+        marginTop: 3 
+    },
     weekCard: {
-        backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10,
+        backgroundColor: 'white', 
+        padding: 15, 
+        borderRadius: 10, 
+        marginBottom: 10,
         elevation: 1,
     },
-    weekTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 5 },
-    weekDetailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 },
-    weekDetailLabel: { fontSize: 14, color: '#555' },
-    weekDetailValueTotal: { fontSize: 14, fontWeight: 'bold', color: '#333' },
-    weekDetailValueCompleted: { fontSize: 14, fontWeight: 'bold', color: '#00A89C' },
-    weekDetailValueCancelled: { fontSize: 14, fontWeight: 'bold', color: '#d9534f' },
-    weekDetailValuePending: { fontSize: 14, fontWeight: 'bold', color: '#FF7F00' },
-    weekDetailValueRevenue: { fontSize: 14, fontWeight: 'bold', color: '#00A89C' },
-
-    downloadButton: {
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#ccc',
-        paddingVertical: 15, alignItems: 'center',
+    weekTitle: { 
+        fontSize: 16, 
+        fontWeight: 'bold', 
+        color: '#333', 
+        marginBottom: 10, 
+        borderBottomWidth: 1, 
+        borderBottomColor: '#eee', 
+        paddingBottom: 5 
     },
-    downloadButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+    weekDetailRow: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        paddingVertical: 3 
+    },
+    weekDetailLabel: { 
+        fontSize: 14, 
+        color: '#555' 
+    },
+    weekDetailValueTotal: { 
+        fontSize: 14, 
+        fontWeight: 'bold', 
+        color: '#333' 
+    },
+    weekDetailValueCompleted: { 
+        fontSize: 14, 
+        fontWeight: 'bold', 
+        color: '#00A89C' 
+    },
+    weekDetailValueCancelled: { 
+        fontSize: 14, 
+        fontWeight: 'bold', 
+        color: '#d9534f' 
+    },
+    weekDetailValuePending: { 
+        fontSize: 14, 
+        fontWeight: 'bold', 
+        color: '#FF7F00' 
+    },
+    weekDetailValueRevenue: { 
+        fontSize: 14, 
+        fontWeight: 'bold', 
+        color: '#00A89C' 
+    },
+    downloadButton: {
+        position: 'absolute', 
+        bottom: 0, 
+        left: 0, 
+        right: 0,
+        backgroundColor: '#ccc',
+        paddingVertical: 15, 
+        alignItems: 'center',
+    },
+    downloadButtonText: { 
+        color: 'white', 
+        fontWeight: 'bold', 
+        fontSize: 16 
+    },
 });

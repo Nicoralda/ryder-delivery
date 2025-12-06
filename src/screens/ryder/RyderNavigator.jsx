@@ -60,7 +60,7 @@ export default function RyderNavigator() {
         options={{ title: 'Órdenes asignadas' }}
       />
       <Drawer.Screen
-        name="Rutas y Precios"
+        name="Rutas y precios"
         component={RyderMapScreen}
         options={{ title: 'Mapa de rutas' }}
       />
@@ -72,7 +72,7 @@ export default function RyderNavigator() {
       <Drawer.Screen
         name="Historial de órdenes"
         component={RyderHistoryScreen}
-        options={{ title: 'Historial y Pagos' }}
+        options={{ title: 'Historial y pagos' }}
       />
     </Drawer.Navigator>
   );

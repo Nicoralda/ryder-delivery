@@ -34,7 +34,7 @@ const CustomDrawerContent = (props) => {
 
       <View style={styles.bottomSection}>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutText}>🚪 Cerrar Sesión</Text>
+          <Text style={styles.logoutText}>🚪 Cerrar sesión</Text>
         </TouchableOpacity>
       </View>
     </View>

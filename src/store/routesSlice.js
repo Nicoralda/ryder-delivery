@@ -3,7 +3,6 @@ import { createSlice } from '@reduxjs/toolkit';
 const routesSlice = createSlice({
   name: 'routes',
   initialState: {
-    // Datos de ejemplo pa empezar
     list: [
       { id: '1', name: 'Zona del Este', zones: 'Chacao, Altamira, Los Palos Grandes', price: '5.00' },
       { id: '2', name: 'Zona del Oeste', zones: 'Catia, Propatria, 23 de Enero', price: '3.50' },

@@ -23,7 +23,6 @@ const getMonthOptions = (numMonths = 6) => {
 const MONTH_OPTIONS = getMonthOptions(6);
 
 export default function RyderHistoryScreen() {
-    // ID SIMULADO DEL RIDER LOGUEADO (idealmente se obtendría de state.auth.user.id)
     const currentRiderId = 'R001'; 
 
     const allOrders = useSelector(state => state.orders.list);
@@ -71,7 +70,6 @@ export default function RyderHistoryScreen() {
             deliveryCount
         };
     }, [allOrders, selectedMonth, currentRiderId]);
-//----------------------------------------------------------------------------------------
 
     const formatCurrency = (amount) => {
         return `$${amount.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
@@ -79,9 +77,8 @@ export default function RyderHistoryScreen() {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={{ padding: 20 }}>
-            <Text style={styles.screenTitle}>Mi Historial de Entregas</Text>
+            <Text style={styles.screenTitle}>Mi historial de entregas</Text>
 
-            {/* filtro de mes */}
             <View style={styles.filterContainer}>
                 <Text style={styles.filterLabel}>Mes a analizar:</Text>
                 <View style={styles.monthSelector}>
@@ -108,7 +105,6 @@ export default function RyderHistoryScreen() {
                 </Text>
             </View>
 
-            {/* métricas */}
             <View style={styles.metricsContainer}>
                 <MetricCard 
                     title="Entregas completadas"
@@ -162,7 +158,6 @@ const styles = StyleSheet.create({
         color: '#333', 
         marginBottom: 20 
     },
-    
     filterContainer: {
         backgroundColor: 'white',
         padding: 15,
@@ -207,7 +202,6 @@ const styles = StyleSheet.create({
         color: '#666',
         textAlign: 'center'
     },
-
     metricsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',

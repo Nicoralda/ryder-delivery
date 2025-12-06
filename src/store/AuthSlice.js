@@ -1,10 +1,9 @@
-// src/store/AuthSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     isAuthenticated: false,
-    user: null, // Guardará { uid, email, fullName, role }
-    role: null, // 'Admin' o 'Ryder'
+    user: null,
+    role: null,
     isLoading: false,
     error: null,
 };
@@ -21,7 +20,7 @@ const authSlice = createSlice({
             state.isLoading = false;
             state.isAuthenticated = true;
             state.user = action.payload; 
-            state.role = action.payload.role; // CRÍTICO: Esto define qué Navigator se muestra
+            state.role = action.payload.role;
             state.error = null;
         },
         loginFailure: (state, action) => {
