@@ -60,7 +60,8 @@ Ejecuta npx expo start o escanea el código QR con tu app Expo Go
 - Generación de reportes en PDF/CSV para admins
 - Enviar notificaciones reales a riders inactivos (funcionalidad admin)
 - Filtros avanzados por zona, rider y estado (funcionalidad admin)
-- Aplicar cambio de tema a toda la app (tanto para rider como para admins)
+- Aplicar cambio de tema a toda la app (tanto para rider como para admin)
+- Ver la ubicación real del rider
 
 
 ## Licencia
