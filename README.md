@@ -13,7 +13,6 @@ La app está diseñada para dos tipos de usuarios, cada uno con un conjunto de f
 - Crear, editar y ver el estado (activo/inactivo) de toda la flota de riders
 - Gestión de Pedidos
 - Crear nuevos pedidos, ver pedidos pendientes, asignar pedidos a riders específicos
-- Tarifas y zonas
 - Gestionar y actualizar las tarifas de entrega por zonas
 - Acceso a un dashboard con KPIs (pedidos completados, ingresos, promedios) con filtros de fecha 
 
@@ -56,3 +55,9 @@ No se requiere acción manual. La aplicación inicializará automáticamente la 
 
 ### Inicia la app
 Ejecuta npx expo start o escanea el código QR con tu app Expo Go
+
+
+## Funcionalidades futuras
+- Generación de reportes en PDF/CSV para admins
+- Enviar notificaciones reales a riders inactivos (funcionalidad admin)
+- Filtros avanzados por zona, rider y estado (funcionalidad admin)

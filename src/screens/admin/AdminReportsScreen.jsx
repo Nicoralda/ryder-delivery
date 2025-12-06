@@ -234,7 +234,6 @@ export default function AdminReportsScreen() {
                 
             </ScrollView>
 
-            {/* BOTÓN DE DESCARGA (FUTURO) */}
             <TouchableOpacity style={styles.downloadButton} disabled={true}>
                 <Text style={styles.downloadButtonText}>Descargar reporte (Futuro)</Text>
             </TouchableOpacity>
