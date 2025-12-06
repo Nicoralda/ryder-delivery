@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/AuthSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../firebase/config';
+import { clearSession } from '../../database/db';
 
 const COLORS = {
     primary: '#00A89C',
@@ -18,10 +19,11 @@ const COLORS = {
 
 export default function AdminProfileScreen() {
     const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
     
     // Obtener los datos del usuario logueado desde Redux
     const user = useSelector(state => state.auth.user) || {
-        fullName: 'Admin',
+        fullName: 'Administrador',
         email: 'admin@app.com',
         role: 'Admin',
     };
@@ -29,7 +31,7 @@ export default function AdminProfileScreen() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const toggleSwitch = () => setIsDarkMode(previousState => !previousState);
 
-    // 🔑 Lógica de Cerrar Sesión con Firebase
+    // Lógica de Cerrar Sesión con Firebase y SQLite
     const handleLogout = () => {
         Alert.alert(
             "Cerrar sesión",
@@ -39,12 +41,16 @@ export default function AdminProfileScreen() {
                 { 
                     text: "Sí, cerrar sesión", 
                     onPress: async () => {
+                        setLoading(true);
                         try {
-                            await signOut(auth);  // 1. Cerrar sesión en Firebase Auth
-                            dispatch(logout());   // 2. Limpiar Redux (Navegación vuelve a Login)
+                            await clearSession(); // 1. Limpiar SQLite (Persistencia local)
+                            await signOut(auth);  // 2. Cerrar sesión en Firebase Auth
+                            dispatch(logout());   // 3. Limpiar Redux (Navegación)
                         } catch (error) {
                             console.error("Error al cerrar sesión:", error);
                             Alert.alert("Error", "No se pudo cerrar la sesión correctamente");
+                        } finally {
+                            setLoading(false);
                         }
                     },
                     style: 'destructive'
@@ -63,7 +69,6 @@ export default function AdminProfileScreen() {
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Detalles de la cuenta</Text>
                     
-                    {/* Nombre completo */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="account" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -74,7 +79,6 @@ export default function AdminProfileScreen() {
                     
                     <View style={styles.separator} />
 
-                    {/* Correo electrónico */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="email" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -85,7 +89,6 @@ export default function AdminProfileScreen() {
                     
                     <View style={styles.separator} />
 
-                    {/* Rol */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="shield-crown" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -121,9 +124,16 @@ export default function AdminProfileScreen() {
                 <TouchableOpacity 
                     style={styles.logoutButton} 
                     onPress={handleLogout}
+                    disabled={loading}
                 >
-                    <MaterialCommunityIcons name="logout" size={20} color={COLORS.card} style={{ marginRight: 10 }} />
-                    <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+                    {loading ? (
+                        <ActivityIndicator color={COLORS.card} />
+                    ) : (
+                        <>
+                            <MaterialCommunityIcons name="logout" size={20} color={COLORS.card} style={{ marginRight: 10 }} />
+                            <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
 
             </ScrollView>

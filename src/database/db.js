@@ -1,79 +1,58 @@
-/*import * as SQLite from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabase('ryders.db');
+const DB_NAME = 'ryders.db';
 
-const execSqlAsync = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        sql,
-        params,
-        (_, result) => resolve(result),
-        (_, error) => {
-          // devuelve false para indicar que la transacción no debe revertirse
-          reject(error);
-          return false;
-        }
-      );
-    }, (txError) => {
-      reject(txError);
-    });
-  });
+const getDB = async () => {
+  return await SQLite.openDatabaseAsync(DB_NAME);
 };
 
 export const initDB = async () => {
   try {
-    await execSqlAsync(
-      `CREATE TABLE IF NOT EXISTS session (
+    const db = await getDB();
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS session (
         uid TEXT PRIMARY KEY NOT NULL,
         email TEXT NOT NULL,
         fullName TEXT,
         role TEXT NOT NULL
-      );`
-    );
-    console.log("SQLite: tabla 'session' inicializada exitosamente");
-    return true;
+      );
+    `);
+    console.log("SQLite: tabla inicializada correctamente");
   } catch (error) {
-    console.error("SQLite ERROR: fallo al crear la tabla 'session':", error);
-    throw error;
+    console.error("SQLite Error (initDB):", error);
   }
 };
 
 export const saveSession = async (uid, email, fullName, role) => {
   try {
-    await execSqlAsync(
+    const db = await getDB();
+    await db.runAsync(
       'INSERT OR REPLACE INTO session (uid, email, fullName, role) VALUES (?, ?, ?, ?);',
       [uid, email, fullName, role]
     );
-    return true;
+    console.log("SQLite: sesión guardada");
   } catch (error) {
-    console.error("SQLite ERROR: fallo al guardar sesión:", error);
-    throw error;
+    console.error("SQLite Error (saveSession):", error);
   }
 };
 
 export const getSession = async () => {
   try {
-    const result = await execSqlAsync('SELECT * FROM session LIMIT 1;');
-    // result.rows is un objeto tipo { length, item(i) }
-    const rows = result.rows;
-    if (rows.length > 0) {
-      const row = rows.item(0);
-      return row;
-    }
-    return null;
+    const db = await getDB();
+    const result = await db.getFirstAsync('SELECT * FROM session LIMIT 1;');
+    return result;
   } catch (error) {
-    console.error("SQLite ERROR: Fallo al obtener sesión:", error);
+    console.error("SQLite Error (getSession):", error);
     return null;
   }
 };
 
 export const clearSession = async () => {
   try {
-    await execSqlAsync('DELETE FROM session;');
-    return true;
+    const db = await getDB();
+    await db.runAsync('DELETE FROM session;');
+    console.log("SQLite: sesión eliminada");
   } catch (error) {
-    console.error("SQLite ERROR: Fallo al limpiar sesión:", error);
-    throw error;
+    console.error("SQLite Error (clearSession):", error);
   }
-};*/
+};

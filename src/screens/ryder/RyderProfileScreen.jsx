@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/AuthSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 
-// 🔑 Firebase Imports para el Logout
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../firebase/config';
+import { clearSession } from '../../database/db';
 
-// Definición de colores para el ryder
 const COLORS = {
     primary: '#FF7F00', 
     secondary: '#00A89C', 
@@ -21,20 +20,20 @@ const COLORS = {
 
 export default function RyderProfileScreen() {
     const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
     
     // Obtener los datos del usuario logueado desde Redux
     const user = useSelector(state => state.auth.user) || {
         fullName: 'Fernando Ryder',
         email: 'fernando.ryder@app.com',
         role: 'Ryder',
-        id: 'R001',
     };
     const { fullName, email } = user;
     
     const [isAvailable, setIsAvailable] = useState(true);
     const toggleAvailability = () => setIsAvailable(previousState => !previousState);
 
-    // 🔑 Lógica de Cerrar Sesión con Firebase
+    // Lógica de Cerrar Sesión con Firebase y SQLite
     const handleLogout = () => {
         Alert.alert(
             "Cerrar sesión",
@@ -44,12 +43,16 @@ export default function RyderProfileScreen() {
                 { 
                     text: "Sí, cerrar sesión", 
                     onPress: async () => {
+                        setLoading(true);
                         try {
-                            await signOut(auth);  // 1. Cerrar sesión en Firebase Auth
-                            dispatch(logout());   // 2. Limpiar Redux (Navegación vuelve a Login)
+                            await clearSession(); // 1. Limpiar SQLite (Persistencia local)
+                            await signOut(auth);  // 2. Cerrar sesión en Firebase Auth
+                            dispatch(logout());   // 3. Limpiar Redux (Navegación)
                         } catch (error) {
                             console.error("Error al cerrar sesión:", error);
                             Alert.alert("Error", "No se pudo cerrar la sesión correctamente");
+                        } finally {
+                            setLoading(false);
                         }
                     },
                     style: 'destructive'
@@ -62,13 +65,12 @@ export default function RyderProfileScreen() {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 
-                <Text style={styles.header}>🛵 Mi perfil Ryder</Text>
+                <Text style={styles.header}>🛵 Mi perfil de Ryder</Text>
                 
                 {/* SECCIÓN DE INFORMACIÓN PERSONAL */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Detalles de la cuenta</Text>
                     
-                    {/* Nombre completo */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="account" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -79,7 +81,6 @@ export default function RyderProfileScreen() {
                     
                     <View style={styles.separator} />
 
-                    {/* Correo electrónico */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="email" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -90,7 +91,6 @@ export default function RyderProfileScreen() {
                     
                     <View style={styles.separator} />
 
-                    {/* Rol */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="motorbike" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -116,7 +116,7 @@ export default function RyderProfileScreen() {
                         </View>
                         <View style={styles.themeSwitcher}>
                             <Text style={[styles.value, { marginRight: 10, color: isAvailable ? COLORS.secondary : COLORS.danger }]}>
-                                {isAvailable ? 'En línea' : 'Fuera de servicio'}
+                                {isAvailable ? 'En Línea' : 'Fuera de Servicio'}
                             </Text>
                             <Switch
                                 trackColor={{ false: COLORS.danger, true: COLORS.secondary }}
@@ -133,9 +133,16 @@ export default function RyderProfileScreen() {
                 <TouchableOpacity 
                     style={styles.logoutButton} 
                     onPress={handleLogout}
+                    disabled={loading}
                 >
-                    <MaterialCommunityIcons name="logout" size={20} color={COLORS.card} style={{ marginRight: 10 }} />
-                    <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+                    {loading ? (
+                        <ActivityIndicator color={COLORS.card} />
+                    ) : (
+                        <>
+                            <MaterialCommunityIcons name="logout" size={20} color={COLORS.card} style={{ marginRight: 10 }} />
+                            <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
 
             </ScrollView>

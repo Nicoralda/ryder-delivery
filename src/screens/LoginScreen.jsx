@@ -6,11 +6,12 @@ import { loginSuccess, loginStart, loginFailure } from '../store/AuthSlice';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase/config';
+import { saveSession } from '../database/db';
 
 export default function LoginScreen({ navigation }) {
     const dispatch = useDispatch();
 
-    const [role, setRole] = useState('rider');
+    const [role, setRole] = useState('rider'); 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -25,28 +26,28 @@ export default function LoginScreen({ navigation }) {
             setLoading(true);
             dispatch(loginStart());
 
-            // 1. Iniciar sesión en Firebase Auth
+            // 1. Firebase Auth
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // 2. Obtener el Rol y datos desde Firestore
+            // 2. Firestore Data
             const docRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const userData = docSnap.data();
                 
-                // 3. VERIFICACIÓN DE ROL
-                // Convertimos el estado local ('rider'/'admin') al formato de la BD ('Ryder'/'Admin')
+                // 3. Validar Rol
                 const selectedRoleFormatted = role === 'admin' ? 'Admin' : 'Ryder';
-                
                 if (userData.role !== selectedRoleFormatted) {
-                    // Si el rol no coincide, desconectamos y lanzamos error
                     await signOut(auth);
-                    throw new Error(`Esta cuenta no tiene permisos de ${selectedRoleFormatted}. Por favor, verifica tu rol`);
+                    throw new Error(`Esta cuenta no es de ${selectedRoleFormatted}.`);
                 }
 
-                // 4. Todo correcto: Guardar en Redux
+                // 4. Guardar en SQLite (Persistencia Local)
+                await saveSession(user.uid, userData.email, userData.fullName, userData.role);
+
+                // 5. Guardar en Redux
                 dispatch(loginSuccess({
                     uid: user.uid,
                     email: userData.email,
@@ -61,12 +62,9 @@ export default function LoginScreen({ navigation }) {
         } catch (error) {
             console.log(error);
             let msg = error.message;
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                msg = 'Correo o contraseña incorrectos.';
-            }
-            
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') msg = 'Credenciales incorrectas';
             dispatch(loginFailure(msg));
-            Alert.alert('Error de acceso', msg);
+            Alert.alert('Error', msg);
         } finally {
             setLoading(false);
         }
@@ -80,52 +78,20 @@ export default function LoginScreen({ navigation }) {
                     {role === 'rider' ? 'Inicia sesión para comenzar a entregar' : 'Acceso para administradores'}
                 </Text>
 
-                {/* Tabs de rol */}
                 <View style={styles.tabs}>
-                    <TouchableOpacity
-                        style={[styles.tab, role === 'rider' && styles.activeTab]}
-                        onPress={() => setRole('rider')}
-                    >
+                    <TouchableOpacity style={[styles.tab, role === 'rider' && styles.activeTab]} onPress={() => setRole('rider')}>
                         <Text style={[styles.tabText, role === 'rider' && styles.activeText]}>Ryders</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tab, role === 'admin' && styles.activeTab]}
-                        onPress={() => setRole('admin')}
-                    >
+                    <TouchableOpacity style={[styles.tab, role === 'admin' && styles.activeTab]} onPress={() => setRole('admin')}>
                         <Text style={[styles.tabText, role === 'admin' && styles.activeText]}>Administradores</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* Formulario */}
-                <TextInput
-                    style={styles.input}
-                    placeholder="Correo Electrónico"
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    placeholderTextColor="#777"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    placeholderTextColor="#777"
-                />
+                <TextInput style={styles.input} placeholder="Correo Electrónico" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#777"/>
+                <TextInput style={styles.input} placeholder="Contraseña" value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor="#777"/>
 
-                <TouchableOpacity 
-                    style={styles.loginButton} 
-                    onPress={handleLogin} 
-                    activeOpacity={0.8}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={styles.loginText}>Iniciar sesión</Text>
-                    )}
+                <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8} disabled={loading}>
+                    {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginText}>Iniciar sesión</Text>}
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>

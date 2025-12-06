@@ -1,24 +1,63 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import HomeScreen from '../screens/HomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import AdminNavigator from '../screens/admin/AdminNavigator';
 import RyderNavigator from '../screens/ryder/RyderNavigator';
+import HomeScreen from '../screens/HomeScreen';
+
+import { initDB, getSession } from '../database/db';
+import { loginSuccess } from '../store/AuthSlice';
 
 const Stack = createStackNavigator();
 
 export default function RootNavigator() {
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
     const role = useSelector(state => state.auth.role);
+    const dispatch = useDispatch();
+
+    const [isAppLoading, setIsAppLoading] = useState(true);
+
+    useEffect(() => {
+        const initializeApp = async () => {
+            try {
+                // 1. Inicializar DB
+                await initDB();
+                
+                // 2. Buscar sesión guardada
+                const session = await getSession();
+                
+                if (session) {
+                    console.log("Sesión recuperada de SQLite:", session);
+                    // Restaurar sesión en Redux
+                    dispatch(loginSuccess(session));
+                }
+            } catch (error) {
+                console.error("Error inicializando app:", error);
+            } finally {
+                setIsAppLoading(false);
+            }
+        };
+
+        initializeApp();
+    }, [dispatch]);
+
+    if (isAppLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#00A89C" />
+            </View>
+        );
+    }
 
     if (!isAuthenticated) {
         return (
             <NavigationContainer>
-                <Stack.Navigator
+                <Stack.Navigator 
                     screenOptions={{ headerShown: false }}
                     initialRouteName="Home"
                 >
@@ -29,7 +68,7 @@ export default function RootNavigator() {
             </NavigationContainer>
         );
     }
-
+    
     return (
         <NavigationContainer>
             {role === 'Admin' ? (
@@ -44,3 +83,12 @@ export default function RootNavigator() {
         </NavigationContainer>
     );
 }
+
+const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+});
