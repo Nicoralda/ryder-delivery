@@ -27,10 +27,10 @@ La app está diseñada para dos tipos de usuarios, cada uno con un conjunto de f
 ## Esta es la arquitectura de mi app:
 
 - Framework: React Native (Expo Go)
-- Gestión de estado: Redux Toolkit
-- Persistencia local: Expo SQLite
-- Backend y autenticación: Firebase Authentication y Firestore
-- Navegación: React Navigation
+- Gestión de estado: Redux Toolkit (para gestionar el estado global de usuario, pedidos, etc. de forma predecible)
+- Persistencia local: Expo SQLite (para soportar modo offline y persistencia de datos)
+- Backend y autenticación: Firebase Authentication y Firestore (para manejar login/signup seguro sin tener que armar backend propio)
+- Navegación: React Navigation (para flujos diferenciados según rol (Admin / Ryder))
 - Estilos: React Native StyleSheet
 
 

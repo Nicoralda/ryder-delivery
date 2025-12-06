@@ -4,6 +4,7 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
 
 export default function RyderMapScreen() {
     const [location, setLocation] = useState(null);
