@@ -122,9 +122,15 @@ export default function AdminOrdersScreen() {
     );
   };
 
-  const handleRequestActivation = (rider) => {
-      dispatch(requestRiderActivation(rider.name));
-  };
+    const handleRequestActivation = (rider) => {
+        dispatch(requestRiderActivation(rider.name));
+
+        Alert.alert(
+            "Solicitud enviada 🔔",
+            `Se ha enviado una notificación de activación al rider ${rider.name}. Esperando que se conecte.`,
+            [{ text: "OK" }]
+        );
+    };
   
   const activeRyders = ryders.filter(r => r.status === 'Activo');
   const inactiveRyders = ryders.filter(r => r.status === 'Inactivo' || r.status === 'Desconectado' || r.status === 'En descanso');
