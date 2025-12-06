@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { loginSuccess, loginStart, loginFailure } from '../store/AuthSlice';
 
-import { loginSuccess } from '../store/AuthSlice';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase/config';
 
 export default function LoginScreen({ navigation }) {
     const dispatch = useDispatch();
@@ -10,18 +13,63 @@ export default function LoginScreen({ navigation }) {
     const [role, setRole] = useState('rider');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Por favor completa todos los campos.');
+            Alert.alert('Error', 'Por favor completa todos los campos');
             return;
         }
 
-        dispatch(loginSuccess({
-            role: role,
-            email: email,
-            name: email
-        }));
+        try {
+            setLoading(true);
+            dispatch(loginStart());
+
+            // 1. Iniciar sesión en Firebase Auth
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // 2. Obtener el Rol y datos desde Firestore
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                
+                // 3. VERIFICACIÓN DE ROL
+                // Convertimos el estado local ('rider'/'admin') al formato de la BD ('Ryder'/'Admin')
+                const selectedRoleFormatted = role === 'admin' ? 'Admin' : 'Ryder';
+                
+                if (userData.role !== selectedRoleFormatted) {
+                    // Si el rol no coincide, desconectamos y lanzamos error
+                    await signOut(auth);
+                    throw new Error(`Esta cuenta no tiene permisos de ${selectedRoleFormatted}. Por favor, verifica tu rol`);
+                }
+
+                // 4. Todo correcto: Guardar en Redux
+                dispatch(loginSuccess({
+                    uid: user.uid,
+                    email: userData.email,
+                    fullName: userData.fullName,
+                    role: userData.role
+                }));
+            } else {
+                await signOut(auth);
+                throw new Error("Usuario no encontrado en la base de datos");
+            }
+
+        } catch (error) {
+            console.log(error);
+            let msg = error.message;
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                msg = 'Correo o contraseña incorrectos.';
+            }
+            
+            dispatch(loginFailure(msg));
+            Alert.alert('Error de acceso', msg);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -67,12 +115,21 @@ export default function LoginScreen({ navigation }) {
                     placeholderTextColor="#777"
                 />
 
-                <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.8}>
-                    <Text style={styles.loginText}>Iniciar Sesión</Text>
+                <TouchableOpacity 
+                    style={styles.loginButton} 
+                    onPress={handleLogin} 
+                    activeOpacity={0.8}
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.loginText}>Iniciar sesión</Text>
+                    )}
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={styles.registerText}>¿No tienes cuenta? Registrate</Text>
+                    <Text style={styles.registerText}>¿No tienes cuenta? Regístrate</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

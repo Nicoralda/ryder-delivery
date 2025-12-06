@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/AuthSlice';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 
+// 🔑 Firebase Imports para el Logout
+import { signOut } from 'firebase/auth';
+import { auth } from '../../../firebase/config';
+
+// Definición de colores para el ryder
 const COLORS = {
-    primary: '#FF7F00',
-    secondary: '#00A89C',
+    primary: '#FF7F00', 
+    secondary: '#00A89C', 
     danger: '#d9534f',
     background: '#f5f5f5',
     card: '#ffffff',
@@ -17,22 +22,19 @@ const COLORS = {
 export default function RyderProfileScreen() {
     const dispatch = useDispatch();
     
-    // Datos del usuario (simulados con Redux por ahora)
+    // Obtener los datos del usuario logueado desde Redux
     const user = useSelector(state => state.auth.user) || {
-        fullName: 'Fernando El Veloz',
+        fullName: 'Fernando Ryder',
         email: 'fernando.ryder@app.com',
         role: 'Ryder',
         id: 'R001',
     };
+    const { fullName, email } = user;
     
-    // Estado del tema (solo simulación por ahora)
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const toggleSwitch = () => setIsDarkMode(previousState => !previousState);
-
-    // Estado para simular la disponibilidad del Ryder
     const [isAvailable, setIsAvailable] = useState(true);
     const toggleAvailability = () => setIsAvailable(previousState => !previousState);
 
+    // 🔑 Lógica de Cerrar Sesión con Firebase
     const handleLogout = () => {
         Alert.alert(
             "Cerrar sesión",
@@ -41,8 +43,14 @@ export default function RyderProfileScreen() {
                 { text: "Cancelar", style: "cancel" },
                 { 
                     text: "Sí, cerrar sesión", 
-                    onPress: () => {
-                        dispatch(logout());
+                    onPress: async () => {
+                        try {
+                            await signOut(auth);  // 1. Cerrar sesión en Firebase Auth
+                            dispatch(logout());   // 2. Limpiar Redux (Navegación vuelve a Login)
+                        } catch (error) {
+                            console.error("Error al cerrar sesión:", error);
+                            Alert.alert("Error", "No se pudo cerrar la sesión correctamente");
+                        }
                     },
                     style: 'destructive'
                 },
@@ -54,46 +62,35 @@ export default function RyderProfileScreen() {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 
-                <Text style={styles.header}>🛵 Mi Perfil Ryder</Text>
+                <Text style={styles.header}>🛵 Mi perfil Ryder</Text>
                 
-                {/* info personal */}
+                {/* SECCIÓN DE INFORMACIÓN PERSONAL */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Detalles de la cuenta</Text>
                     
-                    {/* ID del rider */}
-                    <View style={styles.infoRow}>
-                        <MaterialCommunityIcons name="badge-account-horizontal" size={20} color={COLORS.primary} style={styles.icon} />
-                        <View style={styles.infoTextContainer}>
-                            <Text style={styles.label}>ID del Repartidor</Text>
-                            <Text style={styles.value}>{user.id || 'N/A'}</Text>
-                        </View>
-                    </View>
-                    
-                    <View style={styles.separator} />
-
-                    {/* nombre completo */}
+                    {/* Nombre completo */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="account" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
                             <Text style={styles.label}>Nombre completo</Text>
-                            <Text style={styles.value}>{user.fullName}</Text>
+                            <Text style={styles.value}>{fullName}</Text>
                         </View>
                     </View>
                     
                     <View style={styles.separator} />
 
-                    {/* correo */}
+                    {/* Correo electrónico */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="email" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
                             <Text style={styles.label}>Correo electrónico</Text>
-                            <Text style={styles.value}>{user.email}</Text>
+                            <Text style={styles.value}>{email}</Text>
                         </View>
                     </View>
                     
                     <View style={styles.separator} />
 
-                    {/* rol */}
+                    {/* Rol */}
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="motorbike" size={20} color={COLORS.primary} style={styles.icon} />
                         <View style={styles.infoTextContainer}>
@@ -103,9 +100,9 @@ export default function RyderProfileScreen() {
                     </View>
                 </View>
 
-                {/* disponibilidad del rider */}
+                {/* SECCIÓN DE DISPONIBILIDAD */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Estado de Servicio</Text>
+                    <Text style={styles.cardTitle}>Estado de servicio</Text>
                     
                     <View style={styles.themeRow}>
                         <View style={styles.themeInfo}>
@@ -119,7 +116,7 @@ export default function RyderProfileScreen() {
                         </View>
                         <View style={styles.themeSwitcher}>
                             <Text style={[styles.value, { marginRight: 10, color: isAvailable ? COLORS.secondary : COLORS.danger }]}>
-                                {isAvailable ? 'En Línea' : 'Fuera de servicio'}
+                                {isAvailable ? 'En línea' : 'Fuera de servicio'}
                             </Text>
                             <Switch
                                 trackColor={{ false: COLORS.danger, true: COLORS.secondary }}
@@ -132,7 +129,7 @@ export default function RyderProfileScreen() {
                     </View>
                 </View>
 
-                {/* botón cerrar sesión */}
+                {/* BOTÓN CERRAR SESIÓN */}
                 <TouchableOpacity 
                     style={styles.logoutButton} 
                     onPress={handleLogout}
@@ -150,7 +147,6 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.background },
     scrollContent: { padding: 15, paddingBottom: 50 },
     header: { fontSize: 24, fontWeight: 'bold', color: COLORS.text, marginBottom: 25, textAlign: 'center' },
-
     card: { 
         backgroundColor: COLORS.card, 
         borderRadius: 10, 
@@ -165,21 +161,19 @@ const styles = StyleSheet.create({
     cardTitle: { 
         fontSize: 18, 
         fontWeight: 'bold', 
-        color: COLORS.primary,
+        color: COLORS.primary, 
         marginBottom: 15, 
         borderBottomWidth: 1, 
         borderBottomColor: '#eee', 
         paddingBottom: 8 
     },
-
     infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
     icon: { marginRight: 15 },
     infoTextContainer: { flex: 1 },
     label: { fontSize: 13, color: COLORS.subText },
     value: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginTop: 2 },
-    roleValue: { color: COLORS.primary, fontWeight: 'bold' },
+    roleValue: { color: COLORS.primary, fontWeight: 'bold' }, 
     separator: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 5 },
-
     themeRow: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
@@ -188,7 +182,6 @@ const styles = StyleSheet.create({
     },
     themeInfo: { flexDirection: 'row', alignItems: 'center' },
     themeSwitcher: { flexDirection: 'row', alignItems: 'center' },
-
     logoutButton: {
         flexDirection: 'row',
         backgroundColor: COLORS.danger,

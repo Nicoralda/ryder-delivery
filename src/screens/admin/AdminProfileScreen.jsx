@@ -3,6 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } f
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/AuthSlice';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+import { signOut } from 'firebase/auth';
+import { auth } from '../../../firebase/config';
+
 const COLORS = {
     primary: '#00A89C',
     danger: '#d9534f',
@@ -15,17 +19,17 @@ const COLORS = {
 export default function AdminProfileScreen() {
     const dispatch = useDispatch();
     
-    // Datos del usuario (simulados con Redux por ahora)
+    // Obtener los datos del usuario logueado desde Redux
     const user = useSelector(state => state.auth.user) || {
-        fullName: 'Administrator Global',
-        email: 'admin@deliveryapp.com',
-        role: 'Administrador',
+        fullName: 'Admin',
+        email: 'admin@app.com',
+        role: 'Admin',
     };
     
-    // Estado del tema (solo simulación por ahora)
     const [isDarkMode, setIsDarkMode] = useState(false);
     const toggleSwitch = () => setIsDarkMode(previousState => !previousState);
 
+    // 🔑 Lógica de Cerrar Sesión con Firebase
     const handleLogout = () => {
         Alert.alert(
             "Cerrar sesión",
@@ -34,8 +38,14 @@ export default function AdminProfileScreen() {
                 { text: "Cancelar", style: "cancel" },
                 { 
                     text: "Sí, cerrar sesión", 
-                    onPress: () => {
-                        dispatch(logout());
+                    onPress: async () => {
+                        try {
+                            await signOut(auth);  // 1. Cerrar sesión en Firebase Auth
+                            dispatch(logout());   // 2. Limpiar Redux (Navegación vuelve a Login)
+                        } catch (error) {
+                            console.error("Error al cerrar sesión:", error);
+                            Alert.alert("Error", "No se pudo cerrar la sesión correctamente");
+                        }
                     },
                     style: 'destructive'
                 },
@@ -47,7 +57,7 @@ export default function AdminProfileScreen() {
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 
-                <Text style={styles.header}>👤 Mi perfil</Text>
+                <Text style={styles.header}>👤 Mi perfil de Administrador</Text>
                 
                 {/* SECCIÓN DE INFORMACIÓN PERSONAL */}
                 <View style={styles.card}>
@@ -125,7 +135,6 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.background },
     scrollContent: { padding: 15, paddingBottom: 50 },
     header: { fontSize: 24, fontWeight: 'bold', color: COLORS.text, marginBottom: 25, textAlign: 'center' },
-
     card: { 
         backgroundColor: COLORS.card, 
         borderRadius: 10, 
@@ -146,7 +155,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#eee', 
         paddingBottom: 8 
     },
-
     infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
     icon: { marginRight: 15 },
     infoTextContainer: { flex: 1 },
@@ -154,8 +162,6 @@ const styles = StyleSheet.create({
     value: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginTop: 2 },
     roleValue: { color: COLORS.primary, fontWeight: 'bold' },
     separator: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 5 },
-
-    // Cambiar el tema (por los momentos lo simulo solamente)
     themeRow: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
@@ -164,7 +170,6 @@ const styles = StyleSheet.create({
     },
     themeInfo: { flexDirection: 'row', alignItems: 'center' },
     themeSwitcher: { flexDirection: 'row', alignItems: 'center' },
-
     logoutButton: {
         flexDirection: 'row',
         backgroundColor: COLORS.danger,
